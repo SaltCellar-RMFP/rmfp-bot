@@ -11,6 +11,7 @@
 			"skipFiles": ["<node_internals>/**"],
 			"program": "${workspaceFolder}/src/index.ts",
 			"outFiles": ["${workspaceFolder}/dist/*.js"],
+			"sourceMaps": true,
 			"envFile": "${workspaceFolder}/.env"
 		}
 	]

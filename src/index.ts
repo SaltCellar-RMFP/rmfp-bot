@@ -6,7 +6,14 @@ import { loadCommands, loadEvents, loadJobs } from './util/loaders.js';
 import { registerEvents } from './util/registerEvents.js';
 
 // Initialize the client
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+	],
+});
 
 // Load the events and commands
 const eventsUrl = new URL('events/', import.meta.url);
