@@ -5,8 +5,6 @@ import { predicate as commandPredicate } from '../commands/index.js';
 import type { Command } from '../commands/index.ts';
 import { predicate as eventPredicate } from '../events/index.js';
 import type { Event } from '../events/index.ts';
-import { predicate as jobPredicate } from '../jobs/index.js';
-import type { JobDefinition } from '../jobs/index.ts';
 
 /**
  * A predicate to check if the structure is valid
@@ -75,8 +73,4 @@ export async function loadCommands(dir: PathLike, recursive = true): Promise<Map
 
 export async function loadEvents(dir: PathLike, recursive = true): Promise<Event[]> {
 	return loadStructures(dir, eventPredicate, recursive);
-}
-
-export async function loadJobs(dir: PathLike, recursive = true): Promise<JobDefinition[]> {
-	return loadStructures(dir, jobPredicate, recursive);
 }

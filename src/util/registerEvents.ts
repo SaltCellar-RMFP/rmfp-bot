@@ -18,6 +18,11 @@ export function registerEvents(commands: Map<string, Command>, events: Event[], 
 			}
 		},
 	};
+	client.rest.on('rateLimited', (rateLimitInfo) => {
+		console.log(`The bot has been rate limited.`);
+		console.log(`Globally limited? ${rateLimitInfo.global}`);
+		console.log(`Will need to wait ${rateLimitInfo.retryAfter}`);
+	});
 
 	for (const event of [...events, interactionCreateEvent]) {
 		client[event.once ? 'once' : 'on'](event.name, async (...args) => event.execute(...args));
