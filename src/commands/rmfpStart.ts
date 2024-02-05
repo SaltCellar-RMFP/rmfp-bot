@@ -1,3 +1,5 @@
+import process from 'node:process';
+import type { APIInteractionGuildMember, Client, Guild, GuildMember, Role } from 'discord.js';
 import {
 	GuildScheduledEventEntityType,
 	GuildScheduledEventPrivacyLevel,
@@ -9,6 +11,9 @@ import { DateTime } from 'luxon';
 import { RMFPController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';
 import type { Command } from './index.ts';
+
+const THEME_OPTION = 'theme';
+const LAST_WEEKS_WINNER_OPTION = 'last_winner';
 
 const generateText = (
 	weekNumber: number,
@@ -36,8 +41,31 @@ const generateText = (
 	return content;
 };
 
-const THEME_OPTION = 'theme';
-const LAST_WEEKS_WINNER_OPTION = 'last_winner';
+function isRMFPOwner(guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean {
+	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {
+		console.error(`Error: no RMFP_OWNER_ROLE_ID was provided.`);
+		return false;
+	}
+
+	if (member === null) {
+		console.warn(`Can't verify if null is the RMFP Owner`);
+		return false;
+	}
+
+	const rmfpOwnerRole = guild?.roles.cache.get(process.env.RMFP_OWNER_ROLE_ID);
+
+	if (rmfpOwnerRole === undefined) {
+		console.error(`Guild ${guild?.name} does not have a role with ID ${process.env.RMFP_OWNER_ROLE_ID}`);
+		return false;
+	}
+
+	try {
+		return (member as GuildMember).roles.cache.get(rmfpOwnerRole.id) !== undefined;
+	} catch {
+		return (member as APIInteractionGuildMember).roles.includes(rmfpOwnerRole.id) ?? false;
+	}
+}
+
 export default {
 	data: new SlashCommandBuilder()
 		.setName('rmfp')
@@ -60,8 +88,17 @@ export default {
 			return;
 		}
 
-		const client = await authorize();
-		const rmfp = new RMFPController(client);
+		if (!isRMFPOwner(interaction.guild, interaction.member)) {
+			await interaction.reply({
+				content: 'Only the owner of RMFP may start a new week.',
+				ephemeral: true,
+			});
+			return;
+		}
+
+		const sheetsClient = await authorize();
+
+		const rmfp = new RMFPController(sheetsClient);
 		// PART 1:
 		// Create a new row in the Google Sheet
 		// Rows: Weeks (start @ A2, values = week number)
