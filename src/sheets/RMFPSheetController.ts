@@ -12,7 +12,9 @@ export class RMFPController {
 
 	private static readonly WEEKS_END_ROW = 99;
 
-	private static readonly CONTESTANT_START_COL = 2;
+	private static readonly THEME_COL = 2;
+
+	private static readonly CONTESTANT_START_COL = 3;
 
 	private static readonly CONTESTANT_END_COL = 999;
 
@@ -89,12 +91,66 @@ export class RMFPController {
 			range: `Season 3!R${RMFPController.WEEKS_START_ROW}C${RMFPController.WEEKS_COL}:R${RMFPController.WEEKS_END_ROW}C${RMFPController.WEEKS_COL}`,
 			majorDimension: 'COLUMNS',
 		});
-		return weeksRes.data.values![0].map((x: string) => Number.parseInt(x, 10));
+		if (weeksRes.data.values === undefined || weeksRes.data.values === null) {
+			return [];
+		}
+
+		return weeksRes.data.values[0].map((x: string) => Number.parseInt(x, 10));
 	}
 
 	public async latestWeek(): Promise<number> {
 		const weeks = await this.getWeeks();
+		if (weeks.length === 0) {
+			return 0;
+		}
+
 		return weeks[weeks.length - 1];
+	}
+
+	public async startNewWeek(theme: string): Promise<number> {
+		const latestWeekNumber = await this.latestWeek();
+		const latestWeekIndex = await this.rowIndexOfWeek(latestWeekNumber);
+		const newWeekIndex = latestWeekIndex + 1;
+		const newWeekValue = latestWeekNumber + 1;
+		const newWeekRes = await this.sheets.spreadsheets.values.update({
+			spreadsheetId: process.env.SPREADSHEET_ID,
+			range: `Season 3!R${newWeekIndex}C${RMFPController.WEEKS_COL}:R${newWeekIndex}C${RMFPController.THEME_COL}`,
+			valueInputOption: 'USER_ENTERED',
+			requestBody: {
+				values: [[newWeekValue, theme]],
+			},
+		});
+		return newWeekValue;
+	}
+
+	public async setThemeForWeek(weekNumber: number, theme: string): Promise<void> {
+		const weekIndex = await this.rowIndexOfWeek(weekNumber);
+		const setThemeRes = await this.sheets.spreadsheets.values.update({
+			spreadsheetId: process.env.SPREADSHEET_ID,
+			range: `Season 3!R${weekIndex}C${RMFPController.WEEKS_COL}`,
+			valueInputOption: 'USER_ENTERED',
+			requestBody: {
+				values: [[theme]],
+			},
+		});
+	}
+
+	public async getThemeForWeek(weekNumber: number): Promise<string | null> {
+		const weekIndex = await this.rowIndexOfWeek(weekNumber);
+		if (weekIndex === -1) {
+			return null;
+		}
+
+		const themeRes = await this.sheets.spreadsheets.values.get({
+			spreadsheetId: process.env.SPREADSHEET_ID,
+			range: `Season 3!R${weekIndex}C${RMFPController.THEME_COL}`,
+		});
+
+		if (themeRes.data.values === undefined || themeRes.data.values === null) {
+			return null;
+		}
+
+		return themeRes.data.values![0][0];
 	}
 
 	public async rowIndexOfWeek(weekNumber: number): Promise<number> {

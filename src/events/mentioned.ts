@@ -1,5 +1,5 @@
 import { Events } from 'discord.js';
-import { RMFPController } from '../sheets/RMFPController.js';
+import { RMFPController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';
 import type { Event } from './index.js';
 
