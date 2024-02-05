@@ -8,10 +8,9 @@
 			"type": "node",
 			"request": "launch",
 			"name": "Launch Program",
-			"skipFiles": ["<node_internals>/**"],
 			"program": "${workspaceFolder}/src/index.ts",
-			"outFiles": ["${workspaceFolder}/dist/*.js"],
-			"sourceMaps": true,
+			"preLaunchTask": "tsc: build - tsconfig.json",
+			"outFiles": ["${workspaceFolder}/dist/**/*.js"],
 			"envFile": "${workspaceFolder}/.env"
 		}
 	]

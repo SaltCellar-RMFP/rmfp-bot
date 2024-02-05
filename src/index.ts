@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { URL } from 'node:url';
-import { Client, GatewayIntentBits, IntentsBitField } from 'discord.js';
+import { Client, GatewayIntentBits, IntentsBitField, Partials } from 'discord.js';
 import { loadCommands, loadEvents } from './util/loaders.js';
 import { registerEvents } from './util/registerEvents.js';
 
@@ -13,6 +13,7 @@ const client = new Client({
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildScheduledEvents,
 	],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // Load the events and commands

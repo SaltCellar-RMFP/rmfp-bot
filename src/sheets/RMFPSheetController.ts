@@ -1,4 +1,3 @@
-import process from 'node:process';
 import type { OAuth2Client } from 'google-auth-library';
 import type { sheets_v4 } from 'googleapis';
 import { google } from 'googleapis';
@@ -6,29 +5,36 @@ import { google } from 'googleapis';
 export class RMFPController {
 	private readonly sheets: sheets_v4.Sheets;
 
-	private static readonly WEEKS_START_ROW = 3;
+	private static readonly CONTESTANT_COL = 1;
 
-	private static readonly WEEKS_COL = 1;
+	private static readonly CONTESTANT_START_ROW = 4;
 
-	private static readonly WEEKS_END_ROW = 99;
+	private static readonly CONTESTANT_END_ROW = 9_999;
 
-	private static readonly THEME_COL = 2;
+	private static readonly FIRST_TIME_BONUS_COL = 2;
 
-	private static readonly CONTESTANT_START_COL = 3;
+	private static readonly FIRST_TIME_BONUS_POINTS = 3;
 
-	private static readonly CONTESTANT_END_COL = 999;
+	private static readonly WEEKS_ROW = 2;
 
-	private static readonly CONTESTANT_ROW = 2;
+	private static readonly WEEKS_START_COL = 4;
 
-	public constructor(private readonly client: OAuth2Client) {
+	private static readonly WEEKS_END_COL = 9_999;
+
+	private static readonly THEME_ROW = 3;
+
+	public constructor(
+		client: OAuth2Client,
+		private readonly spreadsheetId: string,
+	) {
 		this.sheets = google.sheets({ version: 'v4', auth: client });
 	}
 
 	public async getContestants() {
-		const startCell = `R${RMFPController.CONTESTANT_ROW}C${RMFPController.CONTESTANT_START_COL}`;
-		const endCell = `R${RMFPController.CONTESTANT_ROW}C${RMFPController.CONTESTANT_END_COL}`;
+		const startCell = `R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.CONTESTANT_COL}`;
+		const endCell = `R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.CONTESTANT_COL}`;
 		const usernameResponse = await this.sheets.spreadsheets.values.get({
-			spreadsheetId: process.env.SPREADSHEET_ID,
+			spreadsheetId: this.spreadsheetId,
 			range: `Season 3!${startCell}:${endCell}`,
 		});
 
@@ -39,26 +45,34 @@ export class RMFPController {
 		return usernameResponse.data.values[0] as string[];
 	}
 
-	public columnIndexOfContestant = async (username: string) => {
+	public rowOfContestant = async (username: string) => {
 		const contestants = await this.getContestants();
 		const contestantIndex = contestants.indexOf(username);
 		if (contestantIndex === -1) {
 			return -1;
 		}
 
-		return contestantIndex + RMFPController.CONTESTANT_START_COL;
+		return contestantIndex + RMFPController.CONTESTANT_START_ROW;
 	};
 
-	public contestantHasEnteredSeason = async (username: string) => (await this.columnIndexOfContestant(username)) !== -1;
+	public contestantHasEnteredSeason = async (username: string) => (await this.rowOfContestant(username)) !== -1;
 
 	public async contestantHasEnteredWeek(username: string, weekNumber: number) {
-		const rowIndex = await this.rowIndexOfWeek(weekNumber);
-		const colIndex = await this.columnIndexOfContestant(username);
+		const weekColumn = await this.columnOfWeek(weekNumber);
+		const contestantRow = await this.rowOfContestant(username);
+
+		if (contestantRow === -1) {
+			return false;
+		}
 
 		const cellRes = await this.sheets.spreadsheets.values.get({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${rowIndex}C${colIndex}`,
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${contestantRow}C${weekColumn}`,
 		});
+
+		if (cellRes.data.values === null || cellRes.data.values === undefined) {
+			return false;
+		}
 
 		const cellValue = cellRes.data.values![0][0];
 
@@ -74,10 +88,10 @@ export class RMFPController {
 		}
 
 		const contestants = await this.getContestants();
-		const newUserIndex = contestants.length + RMFPController.CONTESTANT_START_COL;
+		const newUserRow = contestants.length + RMFPController.CONTESTANT_START_ROW;
 		await this.sheets.spreadsheets.values.update({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${RMFPController.CONTESTANT_ROW}C${newUserIndex}`,
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${newUserRow}C${RMFPController.CONTESTANT_COL}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [[username]],
@@ -87,9 +101,9 @@ export class RMFPController {
 
 	public async getWeeks(): Promise<number[]> {
 		const weeksRes = await this.sheets.spreadsheets.values.get({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${RMFPController.WEEKS_START_ROW}C${RMFPController.WEEKS_COL}:R${RMFPController.WEEKS_END_ROW}C${RMFPController.WEEKS_COL}`,
-			majorDimension: 'COLUMNS',
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${RMFPController.WEEKS_ROW}C${RMFPController.WEEKS_START_COL}:R${RMFPController.WEEKS_ROW}C${RMFPController.WEEKS_END_COL}`,
+			majorDimension: 'ROWS',
 		});
 		if (weeksRes.data.values === undefined || weeksRes.data.values === null) {
 			return [];
@@ -109,25 +123,25 @@ export class RMFPController {
 
 	public async startNewWeek(theme: string): Promise<number> {
 		const latestWeekNumber = await this.latestWeek();
-		const latestWeekIndex = await this.rowIndexOfWeek(latestWeekNumber);
-		const newWeekIndex = latestWeekIndex + 1;
+		const latestWeekColumn = await this.columnOfWeek(latestWeekNumber);
+		const newWeekColumn = latestWeekColumn + 1;
 		const newWeekValue = latestWeekNumber + 1;
-		const newWeekRes = await this.sheets.spreadsheets.values.update({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${newWeekIndex}C${RMFPController.WEEKS_COL}:R${newWeekIndex}C${RMFPController.THEME_COL}`,
+		await this.sheets.spreadsheets.values.update({
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${RMFPController.WEEKS_ROW}C${newWeekColumn}:R${RMFPController.THEME_ROW}C${newWeekColumn}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
-				values: [[newWeekValue, theme]],
+				values: [[newWeekValue], [theme]],
 			},
 		});
 		return newWeekValue;
 	}
 
 	public async setThemeForWeek(weekNumber: number, theme: string): Promise<void> {
-		const weekIndex = await this.rowIndexOfWeek(weekNumber);
-		const setThemeRes = await this.sheets.spreadsheets.values.update({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${weekIndex}C${RMFPController.WEEKS_COL}`,
+		const weekColumn = await this.columnOfWeek(weekNumber);
+		await this.sheets.spreadsheets.values.update({
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${RMFPController.THEME_ROW}C${weekColumn}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [[theme]],
@@ -136,14 +150,14 @@ export class RMFPController {
 	}
 
 	public async getThemeForWeek(weekNumber: number): Promise<string | null> {
-		const weekIndex = await this.rowIndexOfWeek(weekNumber);
-		if (weekIndex === -1) {
+		const weekColumn = await this.columnOfWeek(weekNumber);
+		if (weekColumn === -1) {
 			return null;
 		}
 
 		const themeRes = await this.sheets.spreadsheets.values.get({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${weekIndex}C${RMFPController.THEME_COL}`,
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${RMFPController.THEME_ROW}C${weekColumn}`,
 		});
 
 		if (themeRes.data.values === undefined || themeRes.data.values === null) {
@@ -153,23 +167,44 @@ export class RMFPController {
 		return themeRes.data.values![0][0];
 	}
 
-	public async rowIndexOfWeek(weekNumber: number): Promise<number> {
-		return (await this.getWeeks()).indexOf(weekNumber) + RMFPController.WEEKS_START_ROW;
+	public async columnOfWeek(weekNumber: number): Promise<number> {
+		const weeks = await this.getWeeks();
+		if (weeks.length === 0) {
+			return -1;
+		}
+
+		return weeks.indexOf(weekNumber) + RMFPController.WEEKS_START_COL;
 	}
 
-	public async updateContestantPointsForWeek(username: string, weekNumber: number, points: number) {
+	public async updateContestantPointsForWeek(username: string, weekNumber: number, points: number, messageUrl: string) {
 		if (!(await this.contestantHasEnteredSeason(username))) {
 			await this.enterContestant(username);
 		}
 
-		const columnIndex = await this.columnIndexOfContestant(username);
-		const rowIndex = await this.rowIndexOfWeek(weekNumber);
-		const updatedCell = await this.sheets.spreadsheets.values.update({
-			spreadsheetId: process.env.SPREADSHEET_ID,
-			range: `Season 3!R${rowIndex}C${columnIndex}`,
+		const contestantRow = await this.rowOfContestant(username);
+		const weekColumn = await this.columnOfWeek(weekNumber);
+		await this.sheets.spreadsheets.values.update({
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${contestantRow}C${weekColumn}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
-				values: [[points]],
+				values: [[`=HYPERLINK("${messageUrl}", ${points})`]],
+			},
+		});
+	}
+
+	public async setFirstTimeBonus(username: string) {
+		const contestantRow = await this.rowOfContestant(username);
+		if (contestantRow === -1) {
+			console.error(`Attempted to set a first time bonus for ${username}, but they weren't a contestant.`);
+		}
+
+		await this.sheets.spreadsheets.values.update({
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${contestantRow}C${RMFPController.FIRST_TIME_BONUS_COL}`,
+			valueInputOption: 'USER_ENTERED',
+			requestBody: {
+				values: [[RMFPController.FIRST_TIME_BONUS_POINTS]],
 			},
 		});
 	}

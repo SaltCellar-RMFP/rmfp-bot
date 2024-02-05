@@ -1,19 +1,36 @@
 import process from 'node:process';
-import type { APIInteractionGuildMember, Client, Guild, GuildMember, Role } from 'discord.js';
-import {
-	GuildScheduledEventEntityType,
-	GuildScheduledEventPrivacyLevel,
-	SlashCommandBuilder,
-	SlashCommandStringOption,
-	SlashCommandUserOption,
-} from 'discord.js';
+import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
+import type { APIInteractionGuildMember, Guild, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
-import { RMFPController } from '../sheets/RMFPSheetController.js';
-import { authorize } from '../sheets/index.js';
-import type { Command } from './index.ts';
+import { RMFPController } from '../../sheets/RMFPSheetController.js';
+import { authorize } from '../../sheets/index.js';
+import { THEME_OPTION, LAST_WEEKS_WINNER_OPTION } from '../rmfp.js';
+import type { SubCommand } from './index.js';
 
-const THEME_OPTION = 'theme';
-const LAST_WEEKS_WINNER_OPTION = 'last_winner';
+const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean => {
+	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {
+		console.error(`Error: no RMFP_OWNER_ROLE_ID was provided.`);
+		return false;
+	}
+
+	if (member === null) {
+		console.warn(`Can't verify if null is the RMFP Owner`);
+		return false;
+	}
+
+	const rmfpOwnerRole = guild?.roles.cache.get(process.env.RMFP_OWNER_ROLE_ID);
+
+	if (rmfpOwnerRole === undefined) {
+		console.error(`Guild ${guild?.name} does not have a role with ID ${process.env.RMFP_OWNER_ROLE_ID}`);
+		return false;
+	}
+
+	try {
+		return (member as GuildMember).roles.cache.get(rmfpOwnerRole.id) !== undefined;
+	} catch {
+		return (member as APIInteractionGuildMember).roles.includes(rmfpOwnerRole.id) ?? false;
+	}
+};
 
 const generateText = (
 	weekNumber: number,
@@ -41,53 +58,19 @@ const generateText = (
 	return content;
 };
 
-function isRMFPOwner(guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean {
-	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {
-		console.error(`Error: no RMFP_OWNER_ROLE_ID was provided.`);
-		return false;
-	}
-
-	if (member === null) {
-		console.warn(`Can't verify if null is the RMFP Owner`);
-		return false;
-	}
-
-	const rmfpOwnerRole = guild?.roles.cache.get(process.env.RMFP_OWNER_ROLE_ID);
-
-	if (rmfpOwnerRole === undefined) {
-		console.error(`Guild ${guild?.name} does not have a role with ID ${process.env.RMFP_OWNER_ROLE_ID}`);
-		return false;
-	}
-
-	try {
-		return (member as GuildMember).roles.cache.get(rmfpOwnerRole.id) !== undefined;
-	} catch {
-		return (member as APIInteractionGuildMember).roles.includes(rmfpOwnerRole.id) ?? false;
-	}
-}
-
 export default {
-	data: new SlashCommandBuilder()
-		.setName('rmfp')
-		.setDescription('Starts a new week of RMFP!')
-		.addStringOption(
-			new SlashCommandStringOption()
-				.setName(THEME_OPTION)
-				.setDescription("What's this week's theme?")
-				.setRequired(true),
-		)
-		.addUserOption(
-			new SlashCommandUserOption()
-				.setName(LAST_WEEKS_WINNER_OPTION)
-				.setDescription("Who won last week's RMFP?")
-				.setRequired(false),
-		)
-		.toJSON(),
+	subCommandOption: (subCommand) =>
+		subCommand
+			.setName('start')
+			.setDescription('Starts a new week of RMFP!')
+			.addStringOption((option) =>
+				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
+			)
+			.addUserOption((option) =>
+				option.setName(LAST_WEEKS_WINNER_OPTION).setDescription("Who won last week's RMFP?").setRequired(false),
+			),
+	name: 'start',
 	async execute(interaction) {
-		if (!interaction.isChatInputCommand()) {
-			return;
-		}
-
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({
 				content: 'Only the owner of RMFP may start a new week.',
@@ -98,7 +81,7 @@ export default {
 
 		const sheetsClient = await authorize();
 
-		const rmfp = new RMFPController(sheetsClient);
+		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
 		// PART 1:
 		// Create a new row in the Google Sheet
 		// Rows: Weeks (start @ A2, values = week number)
@@ -106,6 +89,8 @@ export default {
 		const newTheme = interaction.options.getString(THEME_OPTION, true);
 		const newWeek = await rmfp.startNewWeek(newTheme);
 
+		// PART 2:
+		// Create an event
 		const lastWeeksWinner = interaction.options.getUser(LAST_WEEKS_WINNER_OPTION);
 		const lastWeeksTheme = await rmfp.getThemeForWeek(newWeek - 1);
 
@@ -115,20 +100,6 @@ export default {
 			.startOf('day')
 			.plus({ week: 1 })
 			.set({ hour: 10, minute: 0, second: 0 });
-
-		const announcementText = generateText(
-			newWeek,
-			newTheme,
-			scheduledEndTime,
-			true,
-			lastWeeksWinner && lastWeeksTheme
-				? {
-						winner: lastWeeksWinner.id,
-						number: newWeek - 1,
-						theme: lastWeeksTheme,
-					}
-				: undefined,
-		);
 
 		const eventText = generateText(
 			newWeek,
@@ -144,8 +115,6 @@ export default {
 				: undefined,
 		);
 
-		// PART 2:
-		// Create an event?
 		await interaction.guild?.scheduledEvents.create({
 			name: `RMFP: Week ${await rmfp.latestWeek()}`,
 			description: eventText,
@@ -160,9 +129,24 @@ export default {
 
 		// PART 3:
 		// Send a formal announcement announcing that RMFP has started
+		const announcementText = generateText(
+			newWeek,
+			newTheme,
+			scheduledEndTime,
+			true,
+			lastWeeksWinner && lastWeeksTheme
+				? {
+						winner: lastWeeksWinner.id,
+						number: newWeek - 1,
+						theme: lastWeeksTheme,
+					}
+				: undefined,
+		);
+		const interactionResponse = await interaction.reply({ content: announcementText });
+		const announcement = await interactionResponse.fetch();
 
-		const announcementMessage = await interaction.reply({ content: announcementText, fetchReply: true });
-
-		await (await announcementMessage.fetch(true)).pin();
+		// PART 4:
+		// Pin the announcement
+		await announcement.pin();
 	},
-} satisfies Command;
+} satisfies SubCommand;
