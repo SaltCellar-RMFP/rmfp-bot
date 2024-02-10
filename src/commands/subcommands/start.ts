@@ -101,31 +101,31 @@ export default {
 			.plus({ week: 1 })
 			.set({ hour: 10, minute: 0, second: 0 });
 
-		const eventText = generateText(
-			newWeek,
-			newTheme,
-			scheduledEndTime,
-			false,
-			lastWeeksWinner && lastWeeksTheme
-				? {
-						winner: lastWeeksWinner.id,
-						number: newWeek - 1,
-						theme: lastWeeksTheme,
-					}
-				: undefined,
-		);
+		// const eventText = generateText(
+		// 	newWeek,
+		// 	newTheme,
+		// 	scheduledEndTime,
+		// 	false,
+		// 	lastWeeksWinner && lastWeeksTheme
+		// 		? {
+		// 				winner: lastWeeksWinner.id,
+		// 				number: newWeek - 1,
+		// 				theme: lastWeeksTheme,
+		// 			}
+		// 		: undefined,
+		// );
 
-		await interaction.guild?.scheduledEvents.create({
-			name: `RMFP: Week ${await rmfp.latestWeek()}`,
-			description: eventText,
-			scheduledStartTime: scheduledStartTime.toJSDate(),
-			privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-			entityType: GuildScheduledEventEntityType.External,
-			scheduledEndTime: scheduledEndTime.toJSDate(),
-			entityMetadata: {
-				location: '#rmfp',
-			},
-		});
+		// await interaction.guild?.scheduledEvents.create({
+		// 	name: `RMFP: Week ${await rmfp.latestWeek()}`,
+		// 	description: eventText,
+		// 	scheduledStartTime: scheduledStartTime.toJSDate(),
+		// 	privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+		// 	entityType: GuildScheduledEventEntityType.External,
+		// 	scheduledEndTime: scheduledEndTime.toJSDate(),
+		// 	entityMetadata: {
+		// 		location: '#rmfp',
+		// 	},
+		// });
 
 		// PART 3:
 		// Send a formal announcement announcing that RMFP has started
