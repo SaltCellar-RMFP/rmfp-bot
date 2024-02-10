@@ -23,6 +23,8 @@ export class RMFPController {
 
 	private static readonly THEME_ROW = 3;
 
+	private static readonly HYPERLINK_REGEX = /=HYPERLINK\("(?<href>[^"]+)"/;
+
 	public constructor(
 		client: OAuth2Client,
 		private readonly spreadsheetId: string,
@@ -197,6 +199,7 @@ export class RMFPController {
 		const contestantRow = await this.rowOfContestant(username);
 		if (contestantRow === -1) {
 			console.error(`Attempted to set a first time bonus for ${username}, but they weren't a contestant.`);
+			return;
 		}
 
 		await this.sheets.spreadsheets.values.update({
@@ -207,5 +210,35 @@ export class RMFPController {
 				values: [[RMFPController.FIRST_TIME_BONUS_POINTS]],
 			},
 		});
+	}
+
+	public async isRMFPEntryForWeek(messageUrl: string, weekNumber: number): Promise<boolean> {
+		const weekColumn = await this.columnOfWeek(weekNumber);
+		if (weekColumn === -1) {
+			console.error(
+				`Attempted to determine if message ${messageUrl} was an entry for week ${weekNumber}, but no matching week was found.`,
+			);
+			return false;
+		}
+
+		const weekEntriesRes = await this.sheets.spreadsheets.values.get({
+			spreadsheetId: this.spreadsheetId,
+			range: `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${weekColumn}:R${RMFPController.CONTESTANT_END_ROW}C${weekColumn}`,
+			valueRenderOption: 'FORMULA',
+		});
+
+		return (
+			weekEntriesRes.data.values?.findIndex((row: [string]) => {
+				const matches = RMFPController.HYPERLINK_REGEX.exec(row[0]);
+				if (matches === null) {
+					return false;
+				}
+
+				// matches[0] is the entire matched string, which isn't helpful here.
+				const hyperlink = matches[1];
+
+				return hyperlink === messageUrl;
+			}) !== -1
+		);
 	}
 }
