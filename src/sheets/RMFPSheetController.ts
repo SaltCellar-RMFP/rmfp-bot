@@ -23,6 +23,8 @@ export class RMFPController {
 
 	private static readonly THEME_ROW = 3;
 
+	private static readonly SUM_COL = 17;
+
 	private static readonly HYPERLINK_REGEX = /=HYPERLINK\("(?<href>[^"]+)"/;
 
 	public constructor(
@@ -240,5 +242,34 @@ export class RMFPController {
 				return hyperlink === messageUrl;
 			}) !== -1
 		);
+	}
+
+	public async calculateSeasonPoints(): Promise<{ total: number; username: string }[]> {
+		const usernameRange = `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.CONTESTANT_COL}:R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.CONTESTANT_COL}`;
+		const sumRange = `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.SUM_COL}:R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.SUM_COL}`;
+		const response = await this.sheets.spreadsheets.values.batchGet({
+			spreadsheetId: this.spreadsheetId,
+			ranges: [usernameRange, sumRange],
+		});
+
+		const returnValues: { total: number; username: string }[] = [];
+
+		if (!response.data.valueRanges) {
+			console.error(`Error fetching value ranges while calculating season points.`);
+			return [];
+		}
+
+		if (response.data.valueRanges.length !== 2) {
+			console.error(`Only ${response.data.valueRanges.length} ranges were returned, not 2.`);
+			return [];
+		}
+
+		const { values: usernames } = response.data.valueRanges![0]!;
+		const { values: totals } = response.data.valueRanges![1]!;
+		for (const [idx, [username]] of usernames!.entries()) {
+			returnValues.push({ username, total: Number.parseInt(totals![idx][0] as string, 10) });
+		}
+
+		return returnValues;
 	}
 }

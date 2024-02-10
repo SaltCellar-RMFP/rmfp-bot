@@ -4,8 +4,10 @@ import type { APIInteractionGuildMember, Guild, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
 import { RMFPController } from '../../sheets/RMFPSheetController.js';
 import { authorize } from '../../sheets/index.js';
-import { THEME_OPTION, LAST_WEEKS_WINNER_OPTION } from '../rmfp.js';
 import type { SubCommand } from './index.js';
+
+const THEME_OPTION = 'theme';
+const LAST_WEEKS_WINNER_OPTION = 'last_winner';
 
 const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean => {
 	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {

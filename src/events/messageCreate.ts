@@ -20,7 +20,6 @@ export default {
 		}
 
 		if (!message.mentions.has(message.client.application.id)) {
-			console.log('mismatch app ID');
 			return;
 		}
 
