@@ -21,7 +21,6 @@ model Week {
 model Entry {
   week       Week   @relation(fields: [weekNumber], references: [number])
   weekNumber Int
-  userName   String
   userId     String
   messageId  String
   messageUrl String

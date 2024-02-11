@@ -4,6 +4,7 @@ import type { Week } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Events } from 'discord.js';
+import { getLatestWeek } from '../common/getLatestWeek.js';
 import type { Event } from './index.js';
 
 export default {
@@ -29,25 +30,11 @@ export default {
 		}
 
 		const prisma = new PrismaClient();
-		const weeks = (await prisma.week.findMany({
-			where: {
-				end: {
-					gte: new Date(Temporal.Now.instant().epochMilliseconds),
-				},
-			},
-			orderBy: {
-				number: 'desc',
-			},
-			take: 1,
-		})) as [] | [Week];
-
-		if (weeks.length === 0) {
-			console.error('Cannot submit an RMFP entry when there are no active weeks to submit to!');
+		const latestWeek = await getLatestWeek(prisma);
+		if (latestWeek === null) {
 			await message.react('👎');
 			return;
 		}
-
-		const latestWeek = weeks[0];
 
 		const existingEntry = await prisma.entry.findUnique({
 			where: {
@@ -104,7 +91,6 @@ export default {
 		await prisma.entry.create({
 			data: {
 				userId: message.author.id,
-				userName: message.author.username,
 				weekNumber: latestWeek.number,
 				messageId: message.id,
 				messageUrl: message.url,
