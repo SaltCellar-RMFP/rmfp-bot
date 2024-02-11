@@ -44,19 +44,25 @@ const generateText = (
 		winner: string;
 	},
 ): string => {
-	let content = '';
+	const content: string[] = [];
 	if (includeHeader) {
-		content += `# RMFP Week ${weekNumber}\n`;
+		content.push(`# RMFP Week ${weekNumber}`);
 	}
 
-	content += `**Theme**: ${theme}\n`;
+	content.push(`**Theme**: ${theme}`);
 
 	if (lastWeek !== undefined) {
-		content += `**Week ${lastWeek.number}**: ${theme} (Winner: <@${lastWeek.winner}>)\n`;
+		content.push(`**Week ${lastWeek.number}**: ${theme} (Winner: <@${lastWeek.winner}>)`);
 	}
 
-	content += `**Rules**:\n- 1 point for submission\n- 3 points for first-time participants\n- 2 points for highest :muah: count\n- Entries must be submitted by ${deadline.toLocaleString(DateTime.DATETIME_SHORT)} ${deadline.zoneName ?? ''}`;
-	return content;
+	content.concat([
+		`## **Rules**:`,
+		`- 1 point for submission`,
+		`- 3 points for first-time participants`,
+		`- 2 points for highest :muah: count`,
+		`- Entries must be submitted by ${deadline.toLocaleString(DateTime.DATETIME_SHORT)} ${deadline.zoneName ?? ''}`,
+	]);
+	return content.join('\n');
 };
 
 export default {
