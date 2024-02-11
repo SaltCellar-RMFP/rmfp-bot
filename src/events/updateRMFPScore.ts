@@ -1,5 +1,3 @@
-import { Temporal } from '@js-temporal/polyfill';
-import type { Week } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
 import { getLatestWeek } from '../common/getLatestWeek.js';

@@ -1,5 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js';
-import leaderboard from './subcommands/leaderboard.js';
+import { SlashCommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js';
+import extend from './subcommands/extend.js';
+import season from './subcommands/leaderboard/season.js';
+import week from './subcommands/leaderboard/week.js';
 import start from './subcommands/start.js';
 import type { Command } from './index.js';
 
@@ -8,7 +10,14 @@ export default {
 		.setName('rmfp')
 		.setDescription('Perform various RMFP-related tasks.')
 		.addSubcommand(start.subCommandOption)
-		.addSubcommand(leaderboard.subCommandOption)
+		.addSubcommandGroup(
+			new SlashCommandSubcommandGroupBuilder()
+				.setName('leaderboard')
+				.setDescription('Leaderboard calculations')
+				.addSubcommand(season.subCommandOption)
+				.addSubcommand(week.subCommandOption),
+		)
+		.addSubcommand(extend.subCommandOption)
 		.toJSON(),
 	async execute(interaction) {
 		if (!interaction.isChatInputCommand()) {
@@ -19,8 +28,14 @@ export default {
 			case start.name:
 				await start.execute(interaction);
 				break;
-			case leaderboard.name:
-				await leaderboard.execute(interaction);
+			case season.name:
+				await season.execute(interaction);
+				break;
+			case week.name:
+				await week.execute(interaction);
+				break;
+			case extend.name:
+				await extend.execute(interaction);
 				break;
 			default:
 				break;

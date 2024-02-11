@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import type { SubCommand } from './index.js';
+import type { SubCommand } from '../index.js';
 
 export default {
 	subCommandOption: (subCommand) =>
-		subCommand.setName('leaderboard').setDescription('Calculates the current standings for this season of RMFP!'),
-	name: 'leaderboard',
+		subCommand.setName('season').setDescription('Calculates the current standings for this season of RMFP!'),
+	name: 'season',
 	async execute(interaction) {
 		const prisma = new PrismaClient();
 
@@ -12,6 +12,9 @@ export default {
 			by: ['userId'],
 			_sum: {
 				reacts: true,
+			},
+			orderBy: {
+				_sum: { reacts: 'desc' },
 			},
 		});
 

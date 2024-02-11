@@ -1,61 +1,12 @@
-import process from 'node:process';
 import { Temporal } from '@js-temporal/polyfill';
-import type { Week } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
-import {
-	GuildScheduledEventEntityType,
-	GuildScheduledEventPrivacyLevel,
-	type APIInteractionGuildMember,
-	type Guild,
-	type GuildMember,
-} from 'discord.js';
-import rmfp from '../rmfp.js';
+import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
+import { generateText } from '../../common/announcementText.js';
+import { isRMFPOwner } from '../../common/isRMFPOwner.js';
 import type { SubCommand } from './index.js';
 
 const THEME_OPTION = 'theme';
 const LAST_WEEKS_WINNER_OPTION = 'last_winner';
-
-const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean => {
-	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {
-		console.error(`Error: no RMFP_OWNER_ROLE_ID was provided.`);
-		return false;
-	}
-
-	if (member === null) {
-		console.warn(`Can't verify if null is the RMFP Owner`);
-		return false;
-	}
-
-	const rmfpOwnerRole = guild?.roles.cache.get(process.env.RMFP_OWNER_ROLE_ID);
-
-	if (rmfpOwnerRole === undefined) {
-		console.error(`Guild ${guild?.name} does not have a role with ID ${process.env.RMFP_OWNER_ROLE_ID}`);
-		return false;
-	}
-
-	try {
-		return (member as GuildMember).roles.cache.get(rmfpOwnerRole.id) !== undefined;
-	} catch {
-		return (member as APIInteractionGuildMember).roles.includes(rmfpOwnerRole.id) ?? false;
-	}
-};
-
-const generateText = (week: Week, theme: string, deadline: Temporal.ZonedDateTime, includeHeader = false): string => {
-	const content: string[] = [];
-	if (includeHeader) {
-		content.push(`# RMFP Week ${week.number}`);
-	}
-
-	content.push(
-		`**Theme**: ${theme}`,
-		`## **Rules**:`,
-		`- 1 point for submission`,
-		`- 3 points for first-time participants`,
-		`- 2 points for highest :muah: count`,
-		`- Entries must be submitted by ${deadline.toLocaleString()} ${deadline.timeZoneId}`,
-	);
-	return content.join('\n');
-};
 
 export default {
 	subCommandOption: (subCommand) =>

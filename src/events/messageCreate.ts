@@ -1,6 +1,4 @@
 import process from 'node:process';
-import { Temporal } from '@js-temporal/polyfill';
-import type { Week } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Events } from 'discord.js';
