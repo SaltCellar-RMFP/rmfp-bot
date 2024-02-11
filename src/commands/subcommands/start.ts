@@ -1,6 +1,6 @@
+import process from 'node:process';
 import type { APIInteractionGuildMember, Guild, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
-import process from 'node:process';
 import { RMFPSheetController } from '../../sheets/RMFPSheetController.js';
 import { authorize } from '../../sheets/index.js';
 import type { SubCommand } from './index.js';

@@ -1,5 +1,5 @@
-import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
 import process from 'node:process';
+import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
 import { RMFPSheetController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';
 
