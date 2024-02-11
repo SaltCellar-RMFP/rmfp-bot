@@ -1,8 +1,7 @@
-import process from 'node:process';
-import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
 import type { APIInteractionGuildMember, Guild, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
-import { RMFPController } from '../../sheets/RMFPSheetController.js';
+import process from 'node:process';
+import { RMFPSheetController } from '../../sheets/RMFPSheetController.js';
 import { authorize } from '../../sheets/index.js';
 import type { SubCommand } from './index.js';
 
@@ -83,7 +82,7 @@ export default {
 
 		const sheetsClient = await authorize();
 
-		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+		const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
 		// PART 1:
 		// Create a new row in the Google Sheet
 		// Rows: Weeks (start @ A2, values = week number)

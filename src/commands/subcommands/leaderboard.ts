@@ -1,6 +1,5 @@
 import process from 'node:process';
-import type { ChatInputCommandInteraction } from 'discord.js';
-import { RMFPController } from '../../sheets/RMFPSheetController.js';
+import { RMFPSheetController } from '../../sheets/RMFPSheetController.js';
 import { authorize } from '../../sheets/index.js';
 import type { SubCommand } from './index.js';
 
@@ -10,7 +9,7 @@ export default {
 	name: 'leaderboard',
 	async execute(interaction) {
 		const sheetsClient = await authorize();
-		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+		const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
 		const results = await rmfp.calculateSeasonPoints();
 		results.sort((a, b) => {
 			if (a.total !== b.total) {

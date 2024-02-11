@@ -1,7 +1,7 @@
-import process from 'node:process';
-import type { Client, Message } from 'discord.js';
+import type { Message } from 'discord.js';
 import { Events } from 'discord.js';
-import { RMFPController } from '../sheets/RMFPSheetController.js';
+import process from 'node:process';
+import { RMFPSheetController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';
 import type { Event } from './index.js';
 
@@ -29,7 +29,7 @@ export default {
 		}
 
 		const sheetsClient = await authorize();
-		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+		const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
 
 		const { author } = message;
 		if (!(await rmfp.contestantHasEnteredSeason(author.username))) {

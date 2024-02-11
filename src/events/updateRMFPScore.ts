@@ -1,6 +1,6 @@
-import process from 'node:process';
 import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
-import { RMFPController } from '../sheets/RMFPSheetController.js';
+import process from 'node:process';
+import { RMFPSheetController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';
 
 export const updateRMFPScore = async (reaction: MessageReaction | PartialMessageReaction, user: PartialUser | User) => {
@@ -27,7 +27,7 @@ export const updateRMFPScore = async (reaction: MessageReaction | PartialMessage
 	}
 
 	const sheetsClient = await authorize();
-	const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+	const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
 	const latestWeek = await rmfp.latestWeek();
 	if (!(await rmfp.isRMFPEntryForWeek(reaction.message.url, latestWeek))) {
 		console.log("Got a reaction on a message that wasn't an entry for the week.");
