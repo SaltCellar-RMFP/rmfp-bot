@@ -7,7 +7,7 @@
 	},
 	"ignorePatterns": ["**/dist/*"],
 	"rules": {
-		"import/extensions": 0,
-		"eslint-plugin-import/no-extraneous-dependencies": 0
+		"import/extensions": 0
+		// "eslint-plugin-import/no-extraneous-dependencies": 0
 	}
 }

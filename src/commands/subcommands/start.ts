@@ -51,7 +51,7 @@ export default {
 
 		const eventText = generateText(newWeek, newTheme, end, false);
 
-		await interaction.guild?.scheduledEvents.create({
+		const scheduledEvent = await interaction.guild?.scheduledEvents.create({
 			name: `RMFP: Week ${newWeek.number}`,
 			description: eventText,
 			scheduledStartTime: new Date(start.epochMilliseconds),
@@ -60,6 +60,15 @@ export default {
 			scheduledEndTime: new Date(end.epochMilliseconds),
 			entityMetadata: {
 				location: '#rmfp',
+			},
+		});
+
+		await prisma.week.update({
+			where: {
+				number: newWeek.number,
+			},
+			data: {
+				eventId: scheduledEvent?.id,
 			},
 		});
 

@@ -13,7 +13,7 @@ const client = new Client({
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildScheduledEvents,
 	],
-	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildScheduledEvent],
 });
 
 // Load the events and commands

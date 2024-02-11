@@ -11,11 +11,12 @@ datasource db {
 }
 
 model Week {
-  number Int      @id @default(autoincrement())
-  start  DateTime
-  end    DateTime
-  theme  String
-  Entry  Entry[]
+  number  Int      @id @default(autoincrement())
+  start   DateTime
+  end     DateTime
+  theme   String
+  eventId String?
+  Entry   Entry[]
 }
 
 model Entry {

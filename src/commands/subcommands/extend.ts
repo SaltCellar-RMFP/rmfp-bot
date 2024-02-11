@@ -1,5 +1,6 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { PrismaClient } from '@prisma/client';
+import type { GuildScheduledEvent } from 'discord.js';
 import { generateText } from '../../common/announcementText.js';
 import { getLatestWeek } from '../../common/getLatestWeek.js';
 import { isRMFPOwner } from '../../common/isRMFPOwner.js';
@@ -55,9 +56,11 @@ export default {
 		// eslint-disable-next-line no-warning-comments
 		// TODO: Find active event and update end time
 
-		const correspondingEvent = (await interaction.guild!.scheduledEvents.fetch()).find(
-			(scheduledEvent) => scheduledEvent.name === `RMFP: Week ${latestWeek.number}`,
-		);
+		let correspondingEvent: GuildScheduledEvent | null = null;
+
+		if (latestWeek.eventId !== null) {
+			correspondingEvent = await interaction.guild!.scheduledEvents.fetch(latestWeek.eventId);
+		}
 
 		await correspondingEvent?.setScheduledEndTime(new Date(extendedEnd.epochMilliseconds));
 		await correspondingEvent?.setDescription(generateText(latestWeek, latestWeek.theme, extendedEnd));
