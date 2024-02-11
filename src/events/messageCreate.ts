@@ -1,8 +1,9 @@
 import process from 'node:process';
+import { Temporal } from '@js-temporal/polyfill';
+import type { Week } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
-import { Events } from 'discord.js';
-import { RMFPController } from '../sheets/RMFPSheetController.js';
-import { authorize } from '../sheets/index.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Events } from 'discord.js';
 import type { Event } from './index.js';
 
 export default {
@@ -25,21 +26,92 @@ export default {
 
 		if (message.channelId !== process.env.CHANNEL_ID) {
 			console.log('mismatch channel');
+		}
+
+		const prisma = new PrismaClient();
+		const weeks = (await prisma.week.findMany({
+			where: {
+				end: {
+					gte: new Date(Temporal.Now.instant().epochMilliseconds),
+				},
+			},
+			orderBy: {
+				number: 'desc',
+			},
+			take: 1,
+		})) as [] | [Week];
+
+		if (weeks.length === 0) {
+			console.error('Cannot submit an RMFP entry when there are no active weeks to submit to!');
+			await message.react('👎');
 			return;
 		}
 
-		const sheetsClient = await authorize();
-		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+		const latestWeek = weeks[0];
 
-		const { author } = message;
-		if (!(await rmfp.contestantHasEnteredSeason(author.username))) {
-			await rmfp.enterContestant(author.username);
-			await rmfp.setFirstTimeBonus(author.username);
+		const existingEntry = await prisma.entry.findUnique({
+			where: {
+				entryId: {
+					userId: message.author.id,
+					weekNumber: latestWeek.number,
+				},
+			},
+		});
+
+		if (existingEntry !== null) {
+			const confirm = new ButtonBuilder().setCustomId('confirm').setLabel('Replace').setStyle(ButtonStyle.Danger);
+			const cancel = new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary);
+			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel, confirm);
+			const warningMessage = await message.reply({
+				content: "You've already entered this week's RMFP. Do you want to replace your entry?",
+				components: [row],
+			});
+			try {
+				const confirmation = await warningMessage.awaitMessageComponent({
+					filter: (interaction) => interaction.user.id === message.author.id,
+					time: 60_000,
+				});
+
+				if (confirmation.customId === 'confirm') {
+					await prisma.entry.update({
+						where: {
+							entryId: {
+								userId: message.author.id,
+								weekNumber: latestWeek.number,
+							},
+						},
+						data: {
+							messageId: message.id,
+							messageUrl: message.url,
+							reacts: 0,
+						},
+					});
+					await confirmation.update({ content: 'Entry replaced.', components: [] });
+				} else if (confirmation.customId === 'cancel') {
+					await confirmation.update({ content: 'Cancelling', components: [] });
+				}
+
+				return;
+			} catch {
+				await warningMessage.edit({
+					content: 'Confirmation not received within 1 minute, cancelling',
+					components: [],
+				});
+				return;
+			}
 		}
 
-		const latestWeek = await rmfp.latestWeek();
-		if (!(await rmfp.contestantHasEnteredWeek(author.username, latestWeek))) {
-			await rmfp.updateContestantPointsForWeek(author.username, latestWeek, 1, message.url);
-		}
+		await prisma.entry.create({
+			data: {
+				userId: message.author.id,
+				userName: message.author.username,
+				weekNumber: latestWeek.number,
+				messageId: message.id,
+				messageUrl: message.url,
+				reacts: 0,
+			},
+		});
+
+		await message.react('👀');
 	},
 } satisfies Event<Events.MessageCreate>;
