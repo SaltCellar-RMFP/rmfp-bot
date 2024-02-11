@@ -1,5 +1,5 @@
 import process from 'node:process';
-import type { Client, Message } from 'discord.js';
+import type { Message } from 'discord.js';
 import { Events } from 'discord.js';
 import { RMFPController } from '../sheets/RMFPSheetController.js';
 import { authorize } from '../sheets/index.js';

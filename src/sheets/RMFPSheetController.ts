@@ -2,7 +2,7 @@ import type { OAuth2Client } from 'google-auth-library';
 import type { sheets_v4 } from 'googleapis';
 import { google } from 'googleapis';
 
-export class RMFPController {
+export class RMFPSheetController {
 	private readonly sheets: sheets_v4.Sheets;
 
 	private static readonly CONTESTANT_COL = 1;
@@ -35,8 +35,8 @@ export class RMFPController {
 	}
 
 	public async getContestants() {
-		const startCell = `R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.CONTESTANT_COL}`;
-		const endCell = `R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.CONTESTANT_COL}`;
+		const startCell = `R${RMFPSheetController.CONTESTANT_START_ROW}C${RMFPSheetController.CONTESTANT_COL}`;
+		const endCell = `R${RMFPSheetController.CONTESTANT_END_ROW}C${RMFPSheetController.CONTESTANT_COL}`;
 		const usernameResponse = await this.sheets.spreadsheets.values.get({
 			spreadsheetId: this.spreadsheetId,
 			range: `Season 3!${startCell}:${endCell}`,
@@ -56,7 +56,7 @@ export class RMFPController {
 			return -1;
 		}
 
-		return contestantIndex + RMFPController.CONTESTANT_START_ROW;
+		return contestantIndex + RMFPSheetController.CONTESTANT_START_ROW;
 	};
 
 	public contestantHasEnteredSeason = async (username: string) => (await this.rowOfContestant(username)) !== -1;
@@ -92,10 +92,10 @@ export class RMFPController {
 		}
 
 		const contestants = await this.getContestants();
-		const newUserRow = contestants.length + RMFPController.CONTESTANT_START_ROW;
+		const newUserRow = contestants.length + RMFPSheetController.CONTESTANT_START_ROW;
 		await this.sheets.spreadsheets.values.update({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${newUserRow}C${RMFPController.CONTESTANT_COL}`,
+			range: `Season 3!R${newUserRow}C${RMFPSheetController.CONTESTANT_COL}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [[username]],
@@ -106,7 +106,7 @@ export class RMFPController {
 	public async getWeeks(): Promise<number[]> {
 		const weeksRes = await this.sheets.spreadsheets.values.get({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${RMFPController.WEEKS_ROW}C${RMFPController.WEEKS_START_COL}:R${RMFPController.WEEKS_ROW}C${RMFPController.WEEKS_END_COL}`,
+			range: `Season 3!R${RMFPSheetController.WEEKS_ROW}C${RMFPSheetController.WEEKS_START_COL}:R${RMFPSheetController.WEEKS_ROW}C${RMFPSheetController.WEEKS_END_COL}`,
 			majorDimension: 'ROWS',
 		});
 		if (weeksRes.data.values === undefined || weeksRes.data.values === null) {
@@ -132,7 +132,7 @@ export class RMFPController {
 		const newWeekValue = latestWeekNumber + 1;
 		await this.sheets.spreadsheets.values.update({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${RMFPController.WEEKS_ROW}C${newWeekColumn}:R${RMFPController.THEME_ROW}C${newWeekColumn}`,
+			range: `Season 3!R${RMFPSheetController.WEEKS_ROW}C${newWeekColumn}:R${RMFPSheetController.THEME_ROW}C${newWeekColumn}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [[newWeekValue], [theme]],
@@ -145,7 +145,7 @@ export class RMFPController {
 		const weekColumn = await this.columnOfWeek(weekNumber);
 		await this.sheets.spreadsheets.values.update({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${RMFPController.THEME_ROW}C${weekColumn}`,
+			range: `Season 3!R${RMFPSheetController.THEME_ROW}C${weekColumn}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [[theme]],
@@ -161,7 +161,7 @@ export class RMFPController {
 
 		const themeRes = await this.sheets.spreadsheets.values.get({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${RMFPController.THEME_ROW}C${weekColumn}`,
+			range: `Season 3!R${RMFPSheetController.THEME_ROW}C${weekColumn}`,
 		});
 
 		if (themeRes.data.values === undefined || themeRes.data.values === null) {
@@ -177,7 +177,7 @@ export class RMFPController {
 			return -1;
 		}
 
-		return weeks.indexOf(weekNumber) + RMFPController.WEEKS_START_COL;
+		return weeks.indexOf(weekNumber) + RMFPSheetController.WEEKS_START_COL;
 	}
 
 	public async updateContestantPointsForWeek(username: string, weekNumber: number, points: number, messageUrl: string) {
@@ -206,10 +206,10 @@ export class RMFPController {
 
 		await this.sheets.spreadsheets.values.update({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${contestantRow}C${RMFPController.FIRST_TIME_BONUS_COL}`,
+			range: `Season 3!R${contestantRow}C${RMFPSheetController.FIRST_TIME_BONUS_COL}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
-				values: [[RMFPController.FIRST_TIME_BONUS_POINTS]],
+				values: [[RMFPSheetController.FIRST_TIME_BONUS_POINTS]],
 			},
 		});
 	}
@@ -225,13 +225,13 @@ export class RMFPController {
 
 		const weekEntriesRes = await this.sheets.spreadsheets.values.get({
 			spreadsheetId: this.spreadsheetId,
-			range: `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${weekColumn}:R${RMFPController.CONTESTANT_END_ROW}C${weekColumn}`,
+			range: `Season 3!R${RMFPSheetController.CONTESTANT_START_ROW}C${weekColumn}:R${RMFPSheetController.CONTESTANT_END_ROW}C${weekColumn}`,
 			valueRenderOption: 'FORMULA',
 		});
 
 		return (
 			weekEntriesRes.data.values?.findIndex((row: [string]) => {
-				const matches = RMFPController.HYPERLINK_REGEX.exec(row[0]);
+				const matches = RMFPSheetController.HYPERLINK_REGEX.exec(row[0]);
 				if (matches === null) {
 					return false;
 				}
@@ -245,8 +245,8 @@ export class RMFPController {
 	}
 
 	public async calculateSeasonPoints(): Promise<{ total: number; username: string }[]> {
-		const usernameRange = `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.CONTESTANT_COL}:R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.CONTESTANT_COL}`;
-		const sumRange = `Season 3!R${RMFPController.CONTESTANT_START_ROW}C${RMFPController.SUM_COL}:R${RMFPController.CONTESTANT_END_ROW}C${RMFPController.SUM_COL}`;
+		const usernameRange = `Season 3!R${RMFPSheetController.CONTESTANT_START_ROW}C${RMFPSheetController.CONTESTANT_COL}:R${RMFPSheetController.CONTESTANT_END_ROW}C${RMFPSheetController.CONTESTANT_COL}`;
+		const sumRange = `Season 3!R${RMFPSheetController.CONTESTANT_START_ROW}C${RMFPSheetController.SUM_COL}:R${RMFPSheetController.CONTESTANT_END_ROW}C${RMFPSheetController.SUM_COL}`;
 		const response = await this.sheets.spreadsheets.values.batchGet({
 			spreadsheetId: this.spreadsheetId,
 			ranges: [usernameRange, sumRange],

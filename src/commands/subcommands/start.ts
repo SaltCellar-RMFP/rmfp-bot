@@ -1,8 +1,7 @@
 import process from 'node:process';
-import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
 import type { APIInteractionGuildMember, Guild, GuildMember } from 'discord.js';
 import { DateTime } from 'luxon';
-import { RMFPController } from '../../sheets/RMFPSheetController.js';
+import { RMFPSheetController } from '../../sheets/RMFPSheetController.js';
 import { authorize } from '../../sheets/index.js';
 import type { SubCommand } from './index.js';
 
@@ -45,19 +44,25 @@ const generateText = (
 		winner: string;
 	},
 ): string => {
-	let content = '';
+	const content: string[] = [];
 	if (includeHeader) {
-		content += `# RMFP Week ${weekNumber}\n`;
+		content.push(`# RMFP Week ${weekNumber}`);
 	}
 
-	content += `**Theme**: ${theme}\n`;
+	content.push(`**Theme**: ${theme}`);
 
 	if (lastWeek !== undefined) {
-		content += `**Week ${lastWeek.number}**: ${theme} (Winner: <@${lastWeek.winner}>)\n`;
+		content.push(`**Week ${lastWeek.number}**: ${theme} (Winner: <@${lastWeek.winner}>)`);
 	}
 
-	content += `**Rules**:\n- 1 point for submission\n- 3 points for first-time participants\n- 2 points for highest :muah: count\n- Entries must be submitted by ${deadline.toLocaleString(DateTime.DATETIME_SHORT)} ${deadline.zoneName ?? ''}`;
-	return content;
+	content.concat([
+		`## **Rules**:`,
+		`- 1 point for submission`,
+		`- 3 points for first-time participants`,
+		`- 2 points for highest :muah: count`,
+		`- Entries must be submitted by ${deadline.toLocaleString(DateTime.DATETIME_SHORT)} ${deadline.zoneName ?? ''}`,
+	]);
+	return content.join('\n');
 };
 
 export default {
@@ -83,7 +88,7 @@ export default {
 
 		const sheetsClient = await authorize();
 
-		const rmfp = new RMFPController(sheetsClient, process.env.SPREADSHEET_ID!);
+		const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
 		// PART 1:
 		// Create a new row in the Google Sheet
 		// Rows: Weeks (start @ A2, values = week number)
