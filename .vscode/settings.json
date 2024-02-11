@@ -9,5 +9,8 @@
 	"editor.trimAutoWhitespace": false,
 	"files.insertFinalNewline": true,
 	"files.eol": "\n",
-	"npm.packageManager": "npm"
+	"npm.packageManager": "npm",
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma"
+	}
 }

@@ -1,7 +1,6 @@
-import process from 'node:process';
+import { PrismaClient } from '@prisma/client';
 import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
-import { RMFPSheetController } from '../sheets/RMFPSheetController.js';
-import { authorize } from '../sheets/index.js';
+import { getLatestWeek } from '../common/getLatestWeek.js';
 
 export const updateRMFPScore = async (reaction: MessageReaction | PartialMessageReaction, user: PartialUser | User) => {
 	if (reaction.emoji.name !== '❤️') {
@@ -22,32 +21,31 @@ export const updateRMFPScore = async (reaction: MessageReaction | PartialMessage
 			await user.fetch();
 		} catch (error) {
 			console.error('Something went wrong when fetching the user:', error);
-			return;
 		}
 	}
 
-	const sheetsClient = await authorize();
-	const rmfp = new RMFPSheetController(sheetsClient, process.env.SPREADSHEET_ID!);
-	const latestWeek = await rmfp.latestWeek();
-	if (!(await rmfp.isRMFPEntryForWeek(reaction.message.url, latestWeek))) {
-		console.log("Got a reaction on a message that wasn't an entry for the week.");
-		return;
-	}
+	const prisma = new PrismaClient();
 
 	if (reaction.message.author === null) {
 		console.error(`Can't update RMFP score for entry ${reaction.message.url} because author is null.`);
 		return;
 	}
 
-	if (reaction.count === null) {
-		console.error(`Can't update RMFP score for entry ${reaction.message.url} because the reaction count is null.`);
+	const latestWeek = await getLatestWeek(prisma);
+
+	if (latestWeek === null) {
 		return;
 	}
 
-	return rmfp.updateContestantPointsForWeek(
-		reaction.message.author!.username,
-		latestWeek,
-		reaction.count,
-		reaction.message.url,
-	);
+	await prisma.entry.update({
+		where: {
+			entryId: {
+				userId: reaction.message.author.id,
+				weekNumber: latestWeek.number,
+			},
+		},
+		data: {
+			reacts: reaction.count!,
+		},
+	});
 };

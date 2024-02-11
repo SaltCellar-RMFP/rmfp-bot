@@ -1,9 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 
-### Google API Credentials ###
-credentials.json
-token.json
+### SQLite ###
+*.db
 
 ### Node ###
 # Logs
