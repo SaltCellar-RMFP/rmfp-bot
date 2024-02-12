@@ -1,9 +1,10 @@
 import { Temporal } from '@js-temporal/polyfill';
 import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
-import { generateText } from '../../common/announcementText.js';
-import { isRMFPOwner } from '../../common/isRMFPOwner.js';
-import { prisma } from '../../common/prisma.js';
-import type { SubCommand } from './index.js';
+import { generateText } from '../../../common/announcementText.js';
+import { getCurrentSeason } from '../../../common/getCurrentSeason.js';
+import { isRMFPOwner } from '../../../common/isRMFPOwner.js';
+import { prisma } from '../../../common/prisma.js';
+import type { SubCommand } from '../index.js';
 
 const THEME_OPTION = 'theme';
 const LAST_WEEKS_WINNER_OPTION = 'last_winner';
@@ -11,7 +12,7 @@ const LAST_WEEKS_WINNER_OPTION = 'last_winner';
 export default {
 	subCommandOption: (subCommand) =>
 		subCommand
-			.setName('start')
+			.setName('start_week')
 			.setDescription('Starts a new week of RMFP!')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
@@ -19,13 +20,19 @@ export default {
 			.addUserOption((option) =>
 				option.setName(LAST_WEEKS_WINNER_OPTION).setDescription("Who won last week's RMFP?").setRequired(false),
 			),
-	name: 'start',
+	name: 'start_week',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({
 				content: 'Only the owner of RMFP may start a new week.',
 				ephemeral: true,
 			});
+			return;
+		}
+
+		const currentSeason = await getCurrentSeason();
+		if (currentSeason === null) {
+			await interaction.reply("Cannot start a new RMFP week when there aren't any seasons ongoing!");
 			return;
 		}
 
@@ -39,6 +46,7 @@ export default {
 
 		const newWeek = await prisma.week.create({
 			data: {
+				seasonNumber: currentSeason.number,
 				start: new Date(start.epochMilliseconds),
 				end: new Date(end.epochMilliseconds),
 				theme: newTheme,
