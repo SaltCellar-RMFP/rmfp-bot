@@ -15,14 +15,7 @@ export default {
 			return;
 		}
 
-		const currentSeason = await prisma.season.findFirst({
-			where: {
-				completed: false,
-			},
-			orderBy: {
-				number: 'desc',
-			},
-		});
+		const currentSeason = await prisma.season.current();
 
 		if (currentSeason === null) {
 			await interaction.reply({

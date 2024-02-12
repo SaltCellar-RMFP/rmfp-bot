@@ -28,19 +28,7 @@ export default {
 		const days = interaction.options.getInteger('days', true);
 
 		const now = new Date();
-		const currentWeek = await prisma.week.findFirst({
-			where: {
-				start: {
-					lte: now,
-				},
-				end: {
-					gte: now,
-				},
-			},
-			orderBy: {
-				number: 'desc',
-			},
-		});
+		const currentWeek = await prisma.week.current();
 
 		if (currentWeek === null) {
 			await interaction.reply({ content: "There's no active RMFP week to extend.", ephemeral: true });

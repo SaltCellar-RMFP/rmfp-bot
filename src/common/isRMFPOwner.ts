@@ -3,9 +3,9 @@ import type {
 	Awaitable,
 	ButtonInteraction,
 	CacheType,
-	type APIInteractionGuildMember,
-	type Guild,
-	type GuildMember,
+	APIInteractionGuildMember,
+	Guild,
+	GuildMember,
 } from 'discord.js';
 
 export const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean => {

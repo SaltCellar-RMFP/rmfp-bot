@@ -95,23 +95,16 @@ export default {
 		const weekNumber = interaction.options.getInteger('week');
 
 		if (seasonNumber === null) {
-			const latestSeason = await prisma.season.findFirst({
-				where: {
-					completed: false,
-				},
-				orderBy: {
-					number: 'desc',
-				},
-			});
+			const currentSeason = await prisma.season.current();
 
-			if (latestSeason === null) {
+			if (currentSeason === null) {
 				await interaction.reply(
 					"Because you didn't specify a season number, I tried to look up data for the current season. However, it doesn't look like there is a current season: try specifying a season number instead.",
 				);
 				return;
 			}
 
-			seasonNumber = latestSeason.number;
+			seasonNumber = currentSeason.number;
 		} else {
 			const matchingSeason = await prisma.season.findUnique({
 				where: {

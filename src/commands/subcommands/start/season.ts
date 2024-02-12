@@ -16,11 +16,7 @@ export default {
 			return;
 		}
 
-		const currentSeason = await prisma.season.findFirst({
-			where: {
-				completed: false,
-			},
-		});
+		const currentSeason = await prisma.season.current();
 
 		if (currentSeason !== null) {
 			// We can't have two seasons of RMFP going at once, the admin must end the current season first.

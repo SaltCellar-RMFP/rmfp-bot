@@ -112,11 +112,7 @@ export default {
 			return;
 		}
 
-		const currentSeason = await prisma.season.findFirst({
-			where: {
-				completed: false,
-			},
-		});
+		const currentSeason = await prisma.season.current();
 
 		if (currentSeason === null) {
 			await interaction.reply({
@@ -128,21 +124,7 @@ export default {
 		}
 
 		const now = new Date();
-		const currentWeek = await prisma.week.findFirst({
-			where: {
-				seasonNumber: currentSeason.number,
-				start: {
-					lte: now,
-				},
-				end: {
-					gte: now,
-				},
-			},
-
-			orderBy: {
-				number: 'desc',
-			},
-		});
+		const currentWeek = await prisma.week.current();
 
 		if (currentWeek !== null) {
 			await confirmEndCurrentWeek(currentSeason, currentWeek, interaction);
