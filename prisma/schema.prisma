@@ -21,19 +21,22 @@ model Week {
   start        DateTime
   end          DateTime
   theme        String
-  eventId      String?
+  eventId      String?  @unique
   Entry        Entry[]
   Season       Season   @relation(fields: [seasonNumber], references: [number], onDelete: Cascade)
   seasonNumber Int
+
+  @@unique([number, seasonNumber])
 }
 
 model Entry {
   week       Week   @relation(fields: [weekNumber], references: [number], onDelete: Cascade)
   weekNumber Int
   userId     String
-  messageId  String
-  messageUrl String
+  messageId  String @unique
+  messageUrl String @unique
   reacts     Int
 
   @@id(name: "entryId", [weekNumber, userId])
+  @@unique([weekNumber, userId])
 }
