@@ -6,20 +6,20 @@ import type { Event } from './index.js';
 export default {
 	name: Events.GuildScheduledEventUpdate,
 	once: false,
-	async execute(_oldEvent, newEvent) {
-		if (newEvent === null) {
+	async execute(_oldEventState, newEventState) {
+		if (newEventState === null) {
 			return;
 		}
 
-		if (newEvent.partial) {
+		if (newEventState.partial) {
 			try {
-				await newEvent.fetch();
+				await newEventState.fetch();
 			} catch (error) {
 				console.error('Something went wrong when fetching the scheduled event:', error);
 			}
 		}
 
-		const scheduledEvent = newEvent as GuildScheduledEvent<GuildScheduledEventStatus>;
+		const scheduledEvent = newEventState as GuildScheduledEvent<GuildScheduledEventStatus>;
 
 		if (scheduledEvent.isCanceled()) {
 			await prisma.week.deleteMany({
