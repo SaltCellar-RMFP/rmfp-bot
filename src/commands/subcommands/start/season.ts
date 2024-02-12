@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, ActionRowBuilder, ModalBuilder } from 'discord.js';
 import { isRMFPOwner } from '../../../common/isRMFPOwner.js';
 import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
@@ -16,7 +16,7 @@ export default {
 			return;
 		}
 
-		const confirm = new ButtonBuilder().setCustomId('confirm').setLabel('Replace').setStyle(ButtonStyle.Danger);
+		const confirm = new ButtonBuilder().setCustomId('confirm').setLabel('Confirm').setStyle(ButtonStyle.Danger);
 		const cancel = new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary);
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(cancel, confirm);
 		const warningMessage = await interaction.reply({
