@@ -5,7 +5,7 @@ export default {
 	subCommandOption: (subCommand) =>
 		subCommand
 			.setName('extend')
-			.setDescription('Starts a new week of RMFP!')
+			.setDescription('Extends the current week of RMFP.')
 			.addIntegerOption((option) =>
 				option
 					.setName('days')

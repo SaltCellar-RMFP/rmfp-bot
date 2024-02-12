@@ -1,9 +1,4 @@
-import { Temporal } from '@js-temporal/polyfill';
-import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
-import { generateText } from '../../../common/announcementText.js';
-import { getCurrentSeason } from '../../../common/getCurrentSeason.js';
 import { isRMFPOwner } from '../../../common/isRMFPOwner.js';
-import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
 
 const THEME_OPTION = 'theme';
@@ -13,7 +8,7 @@ export default {
 	subCommandOption: (subCommand) =>
 		subCommand
 			.setName('week')
-			.setDescription('Starts a new week of RMFP for the current season.')
+			.setDescription('Starts a new week of RMFP.')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
 			)
