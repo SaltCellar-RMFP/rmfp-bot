@@ -30,12 +30,14 @@ model Week {
 }
 
 model Entry {
-  week       Week   @relation(fields: [weekNumber], references: [number], onDelete: Cascade)
-  weekNumber Int
-  userId     String
-  messageId  String @unique
-  messageUrl String @unique
-  reacts     Int
+  week           Week   @relation(fields: [weekNumber], references: [number], onDelete: Cascade)
+  weekNumber     Int
+  userId         String
+  messageId      String @unique
+  messageUrl     String @unique
+  reacts         Int
+  winnerBonus    Int    @default(0)
+  firstTimeBonus Int    @default(0)
 
   @@id(name: "entryId", [weekNumber, userId])
   @@unique([weekNumber, userId])

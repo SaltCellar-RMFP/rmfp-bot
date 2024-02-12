@@ -1,19 +1,14 @@
-import { Temporal } from '@js-temporal/polyfill';
+import type { Temporal } from '@js-temporal/polyfill';
 import type { Week } from '@prisma/client';
 
-export const generateText = (
-	week: Week,
-	theme: string,
-	deadline: Temporal.ZonedDateTime,
-	includeHeader = false,
-): string => {
+export const generateText = (week: Week, deadline: Temporal.ZonedDateTime, includeHeader = false): string => {
 	const content: string[] = [];
 	if (includeHeader) {
 		content.push(`# RMFP Week ${week.number}`);
 	}
 
 	content.push(
-		`**Theme**: ${theme}`,
+		`**Theme**: ${week.theme}`,
 		`## **Rules**:`,
 		`- 1 point for submission`,
 		`- 3 points for first-time participants`,

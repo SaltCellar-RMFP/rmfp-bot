@@ -1,5 +1,12 @@
 import process from 'node:process';
-import { type APIInteractionGuildMember, type Guild, type GuildMember } from 'discord.js';
+import type {
+	Awaitable,
+	ButtonInteraction,
+	CacheType,
+	type APIInteractionGuildMember,
+	type Guild,
+	type GuildMember,
+} from 'discord.js';
 
 export const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMember | GuildMember | null): boolean => {
 	if (process.env.RMFP_OWNER_ROLE_ID === undefined) {
@@ -25,3 +32,6 @@ export const isRMFPOwner = (guild: Guild | null, member: APIInteractionGuildMemb
 		return (member as APIInteractionGuildMember).roles.includes(rmfpOwnerRole.id) ?? false;
 	}
 };
+
+export const isRMFPOwnerFilter = (buttonInteraction: ButtonInteraction<CacheType>): Awaitable<boolean> =>
+	isRMFPOwner(buttonInteraction.guild, buttonInteraction.member);
