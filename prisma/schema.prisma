@@ -11,8 +11,9 @@ datasource db {
 }
 
 model Season {
-  number Int    @id @default(autoincrement())
-  Week   Week[]
+  number    Int     @id @default(autoincrement())
+  completed Boolean @default(false)
+  Week      Week[]
 }
 
 model Week {
