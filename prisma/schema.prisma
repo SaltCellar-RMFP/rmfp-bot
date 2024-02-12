@@ -10,17 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Season {
+  number Int    @id @default(autoincrement())
+  Week   Week[]
+}
+
 model Week {
-  number  Int      @id @default(autoincrement())
-  start   DateTime
-  end     DateTime
-  theme   String
-  eventId String?
-  Entry   Entry[]
+  number       Int      @id @default(autoincrement())
+  start        DateTime
+  end          DateTime
+  theme        String
+  eventId      String?
+  Entry        Entry[]
+  Season       Season   @relation(fields: [seasonNumber], references: [number], onDelete: Cascade)
+  seasonNumber Int
 }
 
 model Entry {
-  week       Week   @relation(fields: [weekNumber], references: [number])
+  week       Week   @relation(fields: [weekNumber], references: [number], onDelete: Cascade)
   weekNumber Int
   userId     String
   messageId  String
