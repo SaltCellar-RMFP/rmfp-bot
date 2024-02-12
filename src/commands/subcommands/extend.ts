@@ -41,7 +41,7 @@ export default {
 
 		await prisma.week.update({
 			where: {
-				number: currentWeek.number,
+				id: currentWeek.id,
 			},
 			data: {
 				end: new Date(newEnd.epochMilliseconds),

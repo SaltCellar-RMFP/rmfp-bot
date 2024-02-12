@@ -13,32 +13,32 @@ datasource db {
 model Season {
   number    Int     @id @default(autoincrement())
   completed Boolean @default(false)
-  Week      Week[]
+  weeks     Week[]
 }
 
 model Week {
-  number       Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
+  number       Int
   start        DateTime
   end          DateTime
   theme        String
   eventId      String?  @unique
-  Entry        Entry[]
-  Season       Season   @relation(fields: [seasonNumber], references: [number], onDelete: Cascade)
+  entries      Entry[]
+  season       Season   @relation(fields: [seasonNumber], references: [number], onDelete: Cascade)
   seasonNumber Int
 
   @@unique([number, seasonNumber])
 }
 
 model Entry {
-  week           Week   @relation(fields: [weekNumber], references: [number], onDelete: Cascade)
-  weekNumber     Int
   userId         String
   messageId      String @unique
   messageUrl     String @unique
   reacts         Int
   winnerBonus    Int    @default(0)
   firstTimeBonus Int    @default(0)
+  week           Week?  @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  weekId         Int?
 
-  @@id(name: "entryId", [weekNumber, userId])
-  @@unique([weekNumber, userId])
+  @@unique([userId, weekId])
 }

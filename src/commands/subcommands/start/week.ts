@@ -49,8 +49,7 @@ const confirmEndCurrentWeek = async (
 			// End current week
 			await prisma.week.update({
 				where: {
-					seasonNumber: currentSeason.number,
-					number: currentWeek.number,
+					id: currentWeek.id,
 				},
 				data: {
 					end: now,
@@ -139,6 +138,7 @@ export default {
 		const newWeek = await prisma.week.create({
 			data: {
 				theme,
+				number: currentSeason.weeks.length + 1,
 				seasonNumber: currentSeason.number,
 				start: new Date(start.epochMilliseconds),
 				end: new Date(end.epochMilliseconds),
@@ -161,8 +161,7 @@ export default {
 
 		await prisma.week.update({
 			where: {
-				number: newWeek.number,
-				seasonNumber: currentSeason.number,
+				id: newWeek.id,
 			},
 			data: {
 				eventId: scheduledEvent.id,

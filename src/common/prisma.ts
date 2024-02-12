@@ -14,6 +14,9 @@ export const prisma = new PrismaClient().$extends({
 							gte: now,
 						},
 					},
+					include: {
+						entries: true,
+					},
 				});
 			},
 		},
@@ -26,6 +29,9 @@ export const prisma = new PrismaClient().$extends({
 					},
 					orderBy: {
 						number: 'desc',
+					},
+					include: {
+						weeks: true,
 					},
 				});
 			},
