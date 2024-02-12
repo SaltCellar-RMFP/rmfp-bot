@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { getLatestWeek } from '../../../common/getLatestWeek.js';
+import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
 
 export default {
@@ -16,8 +16,6 @@ export default {
 			),
 	name: 'week',
 	async execute(interaction) {
-		const prisma = new PrismaClient();
-
 		let weekNumber = interaction.options.getInteger('week_number');
 		if (weekNumber === null) {
 			const latestWeek = await getLatestWeek(prisma);

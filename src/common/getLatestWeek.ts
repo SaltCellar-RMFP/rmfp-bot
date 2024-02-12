@@ -1,10 +1,10 @@
-import type { Week } from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient, Week } from '@prisma/client';
+import { prisma } from './prisma.js';
 
 export const getLatestWeek = async (prismaClient?: PrismaClient): Promise<Week | null> => {
-	const prisma = prismaClient ?? new PrismaClient();
 	const now = new Date();
-	const weeks = (await prisma.week.findMany({
+	const prismaConn = prisma ?? prismaClient;
+	const weeks = (await prismaConn.week.findMany({
 		where: {
 			end: {
 				gte: now,

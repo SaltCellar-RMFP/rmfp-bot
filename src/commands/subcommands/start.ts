@@ -1,8 +1,8 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { PrismaClient } from '@prisma/client';
 import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from 'discord.js';
 import { generateText } from '../../common/announcementText.js';
 import { isRMFPOwner } from '../../common/isRMFPOwner.js';
+import { prisma } from '../../common/prisma.js';
 import type { SubCommand } from './index.js';
 
 const THEME_OPTION = 'theme';
@@ -36,7 +36,6 @@ export default {
 			.add({ weeks: 1 });
 
 		const newTheme = interaction.options.getString(THEME_OPTION, true);
-		const prisma = new PrismaClient();
 
 		const newWeek = await prisma.week.create({
 			data: {

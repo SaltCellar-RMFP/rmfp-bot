@@ -1,8 +1,8 @@
 import process from 'node:process';
-import { PrismaClient } from '@prisma/client';
 import type { Message } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Events } from 'discord.js';
 import { getLatestWeek } from '../common/getLatestWeek.js';
+import { prisma } from '../common/prisma.js';
 import type { Event } from './index.js';
 
 export default {
@@ -27,7 +27,6 @@ export default {
 			console.log('mismatch channel');
 		}
 
-		const prisma = new PrismaClient();
 		const latestWeek = await getLatestWeek(prisma);
 		if (latestWeek === null) {
 			await message.react('👎');

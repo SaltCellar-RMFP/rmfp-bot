@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
 
 export default {
@@ -6,8 +6,6 @@ export default {
 		subCommand.setName('season').setDescription('Calculates the current standings for this season of RMFP!'),
 	name: 'season',
 	async execute(interaction) {
-		const prisma = new PrismaClient();
-
 		const result = await prisma.entry.groupBy({
 			by: ['userId'],
 			_sum: {

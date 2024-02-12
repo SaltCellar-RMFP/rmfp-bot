@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 'discord.js';
 import { getLatestWeek } from '../common/getLatestWeek.js';
+import { prisma } from '../common/prisma.js';
 
 export const updateRMFPScore = async (reaction: MessageReaction | PartialMessageReaction, user: PartialUser | User) => {
 	if (reaction.emoji.name !== '❤️') {
@@ -23,8 +23,6 @@ export const updateRMFPScore = async (reaction: MessageReaction | PartialMessage
 			console.error('Something went wrong when fetching the user:', error);
 		}
 	}
-
-	const prisma = new PrismaClient();
 
 	if (reaction.message.author === null) {
 		console.error(`Can't update RMFP score for entry ${reaction.message.url} because author is null.`);
