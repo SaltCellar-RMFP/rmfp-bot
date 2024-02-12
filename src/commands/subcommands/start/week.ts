@@ -13,7 +13,7 @@ export default {
 	subCommandOption: (subCommand) =>
 		subCommand
 			.setName('week')
-			.setDescription('Starts a new week of RMFP!')
+			.setDescription('Starts a new week of RMFP for the current season.')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
 			)
