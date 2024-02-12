@@ -1,7 +1,6 @@
 import { SlashCommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js';
 import extend from './subcommands/extend.js';
-import seasonLeaderboard from './subcommands/leaderboard/season.js';
-import weekLeaderboard from './subcommands/leaderboard/week.js';
+import leaderboard from './subcommands/leaderboard.js';
 import startSeason from './subcommands/start/season.js';
 import startWeek from './subcommands/start/week.js';
 import type { Command } from './index.js';
@@ -17,14 +16,8 @@ export default {
 				.addSubcommand(startSeason.subCommandOption)
 				.addSubcommand(startWeek.subCommandOption),
 		)
-		.addSubcommandGroup(
-			new SlashCommandSubcommandGroupBuilder()
-				.setName('leaderboard')
-				.setDescription('Leaderboard calculations')
-				.addSubcommand(seasonLeaderboard.subCommandOption)
-				.addSubcommand(weekLeaderboard.subCommandOption),
-		)
 		.addSubcommand(extend.subCommandOption)
+		.addSubcommand(leaderboard.subCommandOption)
 		.toJSON(),
 	async execute(interaction) {
 		if (!interaction.isChatInputCommand()) {
@@ -38,11 +31,8 @@ export default {
 			case startWeek.name:
 				await startWeek.execute(interaction);
 				break;
-			case seasonLeaderboard.name:
-				await seasonLeaderboard.execute(interaction);
-				break;
-			case weekLeaderboard.name:
-				await weekLeaderboard.execute(interaction);
+			case leaderboard.name:
+				await leaderboard.execute(interaction);
 				break;
 			case extend.name:
 				await extend.execute(interaction);

@@ -12,7 +12,7 @@ const LAST_WEEKS_WINNER_OPTION = 'last_winner';
 export default {
 	subCommandOption: (subCommand) =>
 		subCommand
-			.setName('start_week')
+			.setName('week')
 			.setDescription('Starts a new week of RMFP!')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
@@ -20,7 +20,7 @@ export default {
 			.addUserOption((option) =>
 				option.setName(LAST_WEEKS_WINNER_OPTION).setDescription("Who won last week's RMFP?").setRequired(false),
 			),
-	name: 'start_week',
+	name: 'week',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({
