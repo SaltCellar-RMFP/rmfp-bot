@@ -1,9 +1,3 @@
-import { Temporal } from '@js-temporal/polyfill';
-import type { GuildScheduledEvent } from 'discord.js';
-import { generateText } from '../../common/announcementText.js';
-import { getLatestWeek } from '../../common/getLatestWeek.js';
-import { isRMFPOwner } from '../../common/isRMFPOwner.js';
-import { prisma } from '../../common/prisma.js';
 import type { SubCommand } from './index.js';
 
 export default {
@@ -23,6 +17,6 @@ export default {
 			),
 	name: 'leaderboard',
 	async execute(interaction) {
-		await interaction.reply('🛑');
+		await interaction.reply('🚧');
 	},
 } satisfies SubCommand;
