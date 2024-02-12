@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { Temporal, toTemporalInstant } from '@js-temporal/polyfill';
 import type { Season, Week } from '@prisma/client';
 import type { Awaitable, ButtonInteraction, CacheType, ChatInputCommandInteraction } from 'discord.js';
@@ -69,7 +70,12 @@ const confirmEndCurrentWeek = async (
 				return;
 			}
 
-			await scheduledEvent.setDescription(generateText(currentWeek, Temporal.ZonedDateTime.from(now.toISOString())));
+			await scheduledEvent.setDescription(
+				generateText(
+					currentWeek,
+					Temporal.Instant.fromEpochMilliseconds(now.getTime()).toZonedDateTimeISO(Temporal.Now.timeZoneId()),
+				),
+			);
 			await scheduledEvent.setScheduledEndTime(now);
 
 			await confirmation.update({
@@ -82,7 +88,8 @@ const confirmEndCurrentWeek = async (
 				components: [],
 			});
 		}
-	} catch {
+	} catch (error) {
+		console.error(error);
 		await interaction.editReply({
 			content: 'Confirmation not received within 1 minute, cancelling',
 			components: [],
@@ -167,5 +174,11 @@ export default {
 				eventId: scheduledEvent.id,
 			},
 		});
+
+		const channel = await interaction.guild!.channels.fetch(process.env.CHANNEL_ID!);
+		if (channel?.isTextBased()) {
+			const announcement = await channel.send(generateText(newWeek, end, true));
+			await announcement.pin();
+		}
 	},
 } satisfies SubCommand;
