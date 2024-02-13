@@ -27,7 +27,6 @@ export default {
 
 		const days = interaction.options.getInteger('days', true);
 
-		const now = new Date();
 		const currentWeek = await prisma.week.current();
 
 		if (currentWeek === null) {
@@ -64,8 +63,8 @@ export default {
 			return;
 		}
 
-		await scheduledEvent.setDescription(generateText(currentWeek, newEnd));
-		await scheduledEvent.setScheduledEndTime(new Date(newEnd.epochMilliseconds));
+		await scheduledEvent.setDescription(generateText(currentWeek, newEnd), 'extension');
+		await scheduledEvent.setScheduledEndTime(new Date(newEnd.epochMilliseconds), 'extension');
 
 		await interaction.reply({
 			content: `The current week has been extended by ${days} days.`,

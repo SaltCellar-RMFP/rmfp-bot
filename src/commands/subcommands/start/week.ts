@@ -9,8 +9,10 @@ import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
 
 const THEME_OPTION = 'theme';
-const LAST_WEEKS_WINNER_OPTION = 'last_winner';
 
+/**
+ * Starts a new RMFP week with the provided theme. Informs the user that they must end an ongoing week, if there is one.
+ */
 export default {
 	subCommandOption: (subCommand) =>
 		subCommand
@@ -18,9 +20,6 @@ export default {
 			.setDescription('Starts a new week of RMFP.')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
-			)
-			.addUserOption((option) =>
-				option.setName(LAST_WEEKS_WINNER_OPTION).setDescription("Who won last week's RMFP?").setRequired(false),
 			),
 	name: 'week',
 	async execute(interaction) {
