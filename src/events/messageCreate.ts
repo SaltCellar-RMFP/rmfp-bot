@@ -81,6 +81,15 @@ export default {
 			}
 		}
 
+		const previousEntries = await prisma.entry.aggregate({
+			where: {
+				userId: message.author.id,
+			},
+			_count: {
+				userId: true,
+			},
+		});
+
 		await prisma.entry.create({
 			data: {
 				messageId: message.id,
@@ -88,6 +97,7 @@ export default {
 				weekId: currentWeek.id,
 				userId: message.author.id,
 				reacts: 0,
+				firstTimeBonus: previousEntries._count.userId === 0 ? 3 : 0,
 			},
 		});
 
