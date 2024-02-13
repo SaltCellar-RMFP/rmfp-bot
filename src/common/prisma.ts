@@ -7,9 +7,6 @@ export const prisma = new PrismaClient().$extends({
 				const now = new Date();
 				return prisma.week.findFirst({
 					where: {
-						start: {
-							lte: now,
-						},
 						end: {
 							gte: now,
 						},
