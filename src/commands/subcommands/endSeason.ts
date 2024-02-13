@@ -4,8 +4,8 @@ import { prisma } from '../../common/prisma.js';
 import type { SubCommand } from './index.js';
 
 export default {
-	subCommandOption: (subCommand) => subCommand.setName('endSeason').setDescription('Ends this season of RMFP.'),
-	name: 'season',
+	subCommandOption: (subCommand) => subCommand.setName('end_season').setDescription('Ends this season of RMFP.'),
+	name: 'end_season',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({
