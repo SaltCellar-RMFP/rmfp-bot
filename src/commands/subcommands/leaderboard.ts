@@ -14,9 +14,11 @@ const calculateLeaderboardForSeason = async (
 			},
 		},
 		_sum: {
-			reacts: true,
 			firstTimeBonus: true,
 			winnerBonus: true,
+		},
+		_count: {
+			userId: true,
 		},
 	});
 
@@ -24,7 +26,7 @@ const calculateLeaderboardForSeason = async (
 		.map((entry) => {
 			return {
 				userId: entry.userId,
-				points: entry._sum.firstTimeBonus! + entry._sum.reacts! + entry._sum.winnerBonus!,
+				points: entry._sum.firstTimeBonus! + entry._count.userId! + entry._sum.winnerBonus!,
 			};
 		})
 		.sort((a, b) => a.points - b.points);
