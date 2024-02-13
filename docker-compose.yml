@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  rmfp-bot:
+    build: .
+    volumes:
+      - ./db:/usr/src/app/db
