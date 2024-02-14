@@ -1,6 +1,4 @@
-ARG push_db
-
-FROM node:latest AS build
+FROM node:lts AS build
 WORKDIR /usr/src/app
 
 # Install packages
@@ -13,8 +11,7 @@ COPY src src
 
 RUN npm run build
 
-# We use alpine to have a guaranteed/consistent package manager.
-FROM node:latest
+FROM node:lts
 
 ENV NODE_ENV production
 USER node
@@ -26,8 +23,6 @@ RUN npm ci
 
 COPY --from=build /usr/src/app/dist ./dist
 
-RUN if [ "${push_db}" = "true"] ; then npx prisma db push --schema schema.prisma; fi
+COPY scripts/entrypoint.sh .
 
-RUN node dist/util/deploy.js
-
-CMD ["node", "dist/index.js"]
+CMD ["bash", "entrypoint.sh"]

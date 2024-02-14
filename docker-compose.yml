@@ -3,7 +3,13 @@ services:
   rmfp-bot:
     build:
       context: .
-      args:
-        - push_db=$DEPLOY_PUSH_DB
+    environment:
+      - APPLICATION_ID=${APPLICATION_ID}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - RMFP_OWNER_ROLE_ID=${RMFP_OWNER_ROLE_ID}
+      - GUILD_ID=${GUILD_ID}
+      - CHANNEL_ID=${CHANNEL_ID}
+      - PUSH_DB=${PUSH_DB}
     volumes:
       - ./db:/usr/src/app/db
