@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, SlashCommandSubcommandGroupBuilder } from 'discord.js';
+import endSeason from './subcommands/endSeason.js';
 import extend from './subcommands/extend.js';
 import leaderboard from './subcommands/leaderboard.js';
 import startSeason from './subcommands/start/season.js';
@@ -16,6 +17,7 @@ export default {
 				.addSubcommand(startSeason.subCommandOption)
 				.addSubcommand(startWeek.subCommandOption),
 		)
+		.addSubcommand(endSeason.subCommandOption)
 		.addSubcommand(extend.subCommandOption)
 		.addSubcommand(leaderboard.subCommandOption)
 		.toJSON(),
@@ -30,6 +32,9 @@ export default {
 				break;
 			case startWeek.name:
 				await startWeek.execute(interaction);
+				break;
+			case endSeason.name:
+				await endSeason.execute(interaction);
 				break;
 			case leaderboard.name:
 				await leaderboard.execute(interaction);

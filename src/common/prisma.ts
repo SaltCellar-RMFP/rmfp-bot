@@ -1,3 +1,4 @@
+import type { Entry } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
 export const prisma = new PrismaClient().$extends({
@@ -7,9 +8,6 @@ export const prisma = new PrismaClient().$extends({
 				const now = new Date();
 				return prisma.week.findFirst({
 					where: {
-						start: {
-							lte: now,
-						},
 						end: {
 							gte: now,
 						},
@@ -18,6 +16,24 @@ export const prisma = new PrismaClient().$extends({
 						entries: true,
 					},
 				});
+			},
+
+			async winners(weekId: number): Promise<Entry[]> {
+				const entries = await prisma.entry.findMany({
+					where: {
+						weekId,
+					},
+					orderBy: {
+						reacts: 'desc',
+					},
+				});
+
+				if (entries.length === 0) {
+					return [];
+				}
+
+				const maxPoints = entries[0].reacts;
+				return entries.filter((row) => row.reacts === maxPoints);
 			},
 		},
 

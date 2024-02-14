@@ -2,8 +2,12 @@ import type { Awaitable, ButtonInteraction, CacheType } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { isRMFPOwnerFilter, isRMFPOwner } from '../../../common/isRMFPOwner.js';
 import { prisma } from '../../../common/prisma.js';
+import endSeason from '../endSeason.js';
 import type { SubCommand } from '../index.js';
 
+/**
+ * Begins a new RMFP season. Informs the user if one is ongoing that they must invoke `/rmfp end_season` first.
+ */
 export default {
 	subCommandOption: (subCommand) => subCommand.setName('season').setDescription('Starts a new season of RMFP!'),
 	name: 'season',

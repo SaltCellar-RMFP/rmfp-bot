@@ -37,8 +37,8 @@ model Entry {
   reacts         Int
   winnerBonus    Int    @default(0)
   firstTimeBonus Int    @default(0)
-  week           Week?  @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  weekId         Int?
+  week           Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  weekId         Int
 
   @@unique([userId, weekId])
 }
