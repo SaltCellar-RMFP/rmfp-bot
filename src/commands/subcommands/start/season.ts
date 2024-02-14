@@ -1,8 +1,6 @@
-import type { Awaitable, ButtonInteraction, CacheType } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { isRMFPOwnerFilter, isRMFPOwner } from '../../../common/isRMFPOwner.js';
 import { prisma } from '../../../common/prisma.js';
-import endSeason from '../endSeason.js';
 import type { SubCommand } from '../index.js';
 
 /**

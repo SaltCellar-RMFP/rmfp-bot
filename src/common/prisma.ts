@@ -8,9 +8,10 @@ export const prisma = new PrismaClient().$extends({
 				const now = new Date();
 				return prisma.week.findFirst({
 					where: {
-						end: {
+						scheduledEnd: {
 							gte: now,
 						},
+						ended: false,
 					},
 					include: {
 						entries: true,

@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, ActionRowBuilder, GuildScheduledEventStatus } from 'discord.js';
 import { isRMFPOwner, isRMFPOwnerFilter } from '../../common/isRMFPOwner.js';
 import { prisma } from '../../common/prisma.js';
 import type { SubCommand } from './index.js';
@@ -58,6 +58,36 @@ export default {
 						completed: true,
 					},
 				});
+				await prisma.week.updateMany({
+					where: {
+						seasonNumber: currentSeason.number,
+					},
+					data: {
+						ended: true,
+					},
+				});
+				const rows = await prisma.week.findMany({
+					select: {
+						eventId: true,
+					},
+					where: {
+						seasonNumber: currentSeason.number,
+					},
+				});
+
+				const statusUpdatePromises: Promise<void>[] = rows
+					.filter((row) => row.eventId !== null)
+					.map(async (row) => {
+						const event = await interaction.guild!.scheduledEvents.fetch(row.eventId!);
+						if (event.status === GuildScheduledEventStatus.Active) {
+							await event.setStatus(GuildScheduledEventStatus.Active, 'ended early');
+						} else if (event.status === GuildScheduledEventStatus.Scheduled) {
+							await event.setStatus(GuildScheduledEventStatus.Canceled, 'ended early');
+						}
+					});
+
+				await Promise.all(statusUpdatePromises);
+
 				await confirmation.update({
 					content: 'The current season of RMFP has ended.',
 					components: [],

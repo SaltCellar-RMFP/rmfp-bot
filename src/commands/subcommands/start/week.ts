@@ -79,8 +79,8 @@ async function createWeek(
 			theme,
 			number: currentSeason.weeks.length + 1,
 			seasonNumber: currentSeason.number,
-			start: new Date(start.epochMilliseconds),
-			end: new Date(end.epochMilliseconds),
+			scheduledStart: new Date(start.epochMilliseconds),
+			scheduledEnd: new Date(end.epochMilliseconds),
 		},
 	});
 
