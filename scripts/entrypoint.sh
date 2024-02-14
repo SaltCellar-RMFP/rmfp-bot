@@ -2,6 +2,9 @@
 
 if [ "${PUSH_DB}" = "true" ]; then
     echo "pushing DB changes via prisma"
+    if [ ! -f /usr/src/app/db/app.db ]; then
+        touch /usr/src/app/db/app.db
+    fi
     npx prisma db push --schema prisma/schema.prisma
 fi
 

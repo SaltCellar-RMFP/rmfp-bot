@@ -14,7 +14,7 @@ RUN npm run build
 FROM node:lts
 
 ENV NODE_ENV production
-USER node
+
 WORKDIR /usr/src/app
 
 COPY package*.json .
