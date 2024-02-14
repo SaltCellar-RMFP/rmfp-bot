@@ -1,6 +1,9 @@
 version: '3.8'
 services:
   rmfp-bot:
-    build: .
+    build:
+      context: .
+      args:
+        - push_db=$DEPLOY_PUSH_DB
     volumes:
       - ./db:/usr/src/app/db
