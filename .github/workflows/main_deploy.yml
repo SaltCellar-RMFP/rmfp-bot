@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+  workflow_dispatch
 
 jobs:
   build-and-deploy:
@@ -14,15 +15,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: '📝 Check if DB Schema was Changed'
+        env:
+          SHOULD_CHECK: ${{ github.event_name == 'push' }}
         id: changed-files
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
-          if [ $? -eq 0 ]; then
-            echo "pushing db changes"
-            echo "PUSH_DB=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "no db changes to push"
-            echo "PUSH_DB=false" >> "$GITHUB_OUTPUT"
+          if [ $GITHUB_EVENT_NAME == push ]; then
+            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
+            if [ $? -eq 0 ]; then
+              echo "pushing db changes"
+              echo "PUSH_DB=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "no db changes to push"
+              echo "PUSH_DB=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
       - name: '🔑 Authenticate With GCP'
         id: auth
         uses: 'google-github-actions/auth@v2'
