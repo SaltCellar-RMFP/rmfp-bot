@@ -34,7 +34,7 @@ export default {
 			return;
 		}
 
-		const newEnd = Temporal.Instant.fromEpochMilliseconds(currentWeek.end.getTime())
+		const newEnd = Temporal.Instant.fromEpochMilliseconds(currentWeek.scheduledEnd.getTime())
 			.toZonedDateTimeISO(Temporal.Now.timeZoneId())
 			.add({ days });
 
@@ -43,7 +43,7 @@ export default {
 				id: currentWeek.id,
 			},
 			data: {
-				end: new Date(newEnd.epochMilliseconds),
+				scheduledEnd: new Date(newEnd.epochMilliseconds),
 			},
 		});
 
