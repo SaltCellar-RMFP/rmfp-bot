@@ -19,6 +19,7 @@ jobs:
           SHOULD_CHECK: ${{ github.event_name == 'push' }}
         id: changed-files
         run: |
+          set +x
           if [ $GITHUB_EVENT_NAME == push ]; then
             git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
             if [ $? -eq 0 ]; then
