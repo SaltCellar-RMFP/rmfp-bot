@@ -64,6 +64,7 @@ jobs:
       - name: '☁️✅ Deploy to VM Instance'
         run: |
           gcloud compute instances update-container rmfp-stage-final \
+          --zone us-east1-b \
           --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \
           --container-mount-disk mount-path="/usr/src/app/db",name=rmfp-staging-db \
           --container-env-file ./.env
