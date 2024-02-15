@@ -2,8 +2,7 @@ name: Build and Deploy RMFPBot
 
 on:
   push:
-    branches:
-      -main
+    branches: -main
 
 jobs:
   build-and-deploy:
@@ -18,8 +17,10 @@ jobs:
         run: |
           git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
           if [ $? -eq 0 ]; then
+            echo "pushing db changes"
             echo "PUSH_DB=true" >> "$GITHUB_OUTPUT"
           else
+            echo "no db changes to push"
             echo "PUSH_DB=false" >> "$GITHUB_OUTPUT"
       - name: '🔑 Authenticate With GCP'
         id: auth
@@ -38,11 +39,11 @@ jobs:
         # I know it's tedious, but it's what we've gotta do.
       - name: '🤫 Create Environment Variables File'
         env:
-          APPLICATION_ID:     ${{ secrets.APPLICATION_ID }}
-          CHANNEL_ID:         ${{ secrets.CHANNEL_ID }}
-          DISCORD_TOKEN:      ${{ secrets.DISCORD_TOKEN }}
-          GUILD_ID:           ${{ secrets.GUILD_ID }}
-          PUSH_DB:            ${{ steps.changed-files.PUSH_DB }}
+          APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          PUSH_DB: ${{ steps.changed-files.PUSH_DB }}
           RMFP_OWNER_ROLE_ID: ${{ secrets.RMFP_OWNER_ROLE_ID }}
         run: |
           touch .env
@@ -53,7 +54,7 @@ jobs:
           echo "GUILD_ID=$GUILD_ID" >> .env
           echo "PUSH_DB=$PUSH_DB" >> .env
           echo "RMFP_OWNER_ROLE_ID=$RMFP_OWNER_ROLE_ID" >> .env
-      - name: '☁️✅ Deploy to VM Instance'  
+      - name: '☁️✅ Deploy to VM Instance'
         run: |
           gcloud compute instances update-container rmfp-stage-final \
           --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \

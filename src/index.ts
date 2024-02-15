@@ -16,13 +16,13 @@ const client = new Client({
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildScheduledEvent],
 });
 
-// Load the events and commands.
+// Load the events and commands
 const eventsUrl = new URL('events/', import.meta.url);
 const commandsUrl = new URL('commands/', import.meta.url);
 const events = await loadEvents(eventsUrl);
 const commands = await loadCommands(commandsUrl);
 
-// Register the event handlers!!
+// Register the event handlers
 registerEvents(commands, events, client);
 
 // Login to the client
