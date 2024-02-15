@@ -15,13 +15,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: '📝 Check if DB Schema was Changed'
-        env:
-          SHOULD_CHECK: ${{ github.event_name == 'push' }}
         id: changed-files
+        shell: bash {0}
         run: |
           set +x
           if [ $GITHUB_EVENT_NAME == push ]; then
-            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
+            (git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/")
             if [ $? -eq 0 ]; then
               echo "pushing db changes"
               echo "PUSH_DB=true" >> "$GITHUB_OUTPUT"
