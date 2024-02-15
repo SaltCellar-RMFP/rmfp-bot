@@ -1,0 +1,61 @@
+name: Build and Deploy RMFPBot
+
+on:
+  push:
+    branches:
+      -main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: '📥 Checkout Code'
+        uses: 'actions/checkout@v4'
+        with:
+          fetch-depth: 0
+      - name: '📝 Check if DB Schema was Changed'
+        id: changed-files
+        run: |
+          git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep "prisma/"
+          if [ $? -eq 0 ]; then
+            echo "PUSH_DB=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "PUSH_DB=false" >> "$GITHUB_OUTPUT"
+      - name: '🔑 Authenticate With GCP'
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: '☁️ Set Up GCP SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: '🐋🔒 Set Up Docker Auth'
+        run: 'gcloud auth configure-docker us-east1-docker.pkg.dev'
+      - name: '🐋📤 Build and Upload Docker Image'
+        run: |
+          docker build -t rmfp-bot .
+          docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest
+          docker push us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot
+        # I know it's tedious, but it's what we've gotta do.
+      - name: '🤫 Create Environment Variables File'
+        env:
+          APPLICATION_ID:     ${{ secrets.APPLICATION_ID }}
+          CHANNEL_ID:         ${{ secrets.CHANNEL_ID }}
+          DISCORD_TOKEN:      ${{ secrets.DISCORD_TOKEN }}
+          GUILD_ID:           ${{ secrets.GUILD_ID }}
+          PUSH_DB:            ${{ steps.changed-files.PUSH_DB }}
+          RMFP_OWNER_ROLE_ID: ${{ secrets.RMFP_OWNER_ROLE_ID }}
+        run: |
+          touch .env
+          echo "APPLICATION_ID=$APPLICATION_ID" >> .env
+          echo "CHANNEL_ID=$CHANNEL_ID" >> .env
+          echo "DATABASE_URL=file:/usr/src/app/db/app.db" >> .env
+          echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env
+          echo "GUILD_ID=$GUILD_ID" >> .env
+          echo "PUSH_DB=$PUSH_DB" >> .env
+          echo "RMFP_OWNER_ROLE_ID=$RMFP_OWNER_ROLE_ID" >> .env
+      - name: '☁️✅ Deploy to VM Instance'  
+        run: |
+          gcloud compute instances update-container rmfp-stage-final \
+          --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \
+          --container-mount-disk mount-path="/usr/src/app/db",name=rmfp-staging-db \
+          --container-env-file ./.env
