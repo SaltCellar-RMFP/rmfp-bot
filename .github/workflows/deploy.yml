@@ -53,7 +53,7 @@ jobs:
               },
               "prod": {
                 "APP_NAME": "rmfp-prod",
-                "DB_NAME": "rmfp-prod-db"
+                "DB_NAME": "rmfp-prod-db",
                 "APPLICATION_ID": "${{ secrets.PROD_APPLICATION_ID }}",
                 "CHANNEL_ID": "${{ secrets.PROD_CHANNEL_ID }}",
                 "DISCORD_TOKEN": "${{ secrets.PROD_DISCORD_TOKEN }}",
