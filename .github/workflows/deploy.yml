@@ -39,7 +39,7 @@ jobs:
       - name: '✍🏽 Map input to VM and DB name'
         uses: kanga333/variable-mapper@master
         with:
-          key: '${{ github.event.inputs.environment }}'
+          key: '${{ inputs.environment }}'
           map: |
             {
               "stage": {
