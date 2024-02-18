@@ -1,0 +1,81 @@
+name: Deploy Latest RMFPBot
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'which environment to deploy to'
+        default: 'stage'
+        options:
+          - stage
+          - prod
+      push_db:
+        type: boolean
+        description: 'update prisma db on startup'
+        default: false
+  workflow-call:
+    inputs:
+      environment:
+        type: string
+        description: 'which environment to deploy to'
+        default: 'stage'
+      push_db:
+        type: boolean
+        description: 'update prisma db on startup'
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: '🔑 Authenticate With GCP'
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+      - name: '☁️ Set Up GCP SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+      - name: '✍🏽 Map input to VM and DB name'
+        uses: kanga333/variable-mapper@master
+        with:
+          key: '${{ github.event.inputs.environment }}'
+          map: |
+            {
+              "stage": {
+                "APP_NAME": "rmfp-stage-final",
+                "DB_NAME": "rmfp-staging-db",
+                "APPLICATION_ID": "${{ secrets.APPLICATION_ID }}",
+                "CHANNEL_ID": "${{ secrets.CHANNEL_ID }}",
+                "DISCORD_TOKEN": "${{ secrets.DISCORD_TOKEN }}",
+                "GUILD_ID": "${{ secrets.GUILD_ID }}",
+                "RMFP_OWNER_ROLE_ID": "${{ secrets.RMFP_OWNER_ROLE_ID }}"
+              },
+              "prod": {
+                "APP_NAME": "rmfp-prod",
+                "DB_NAME": "rmfp-prod-db"
+                "APPLICATION_ID": "${{ secrets.PROD_APPLICATION_ID }}",
+                "CHANNEL_ID": "${{ secrets.PROD_CHANNEL_ID }}",
+                "DISCORD_TOKEN": "${{ secrets.PROD_DISCORD_TOKEN }}",
+                "GUILD_ID": "${{ secrets.PROD_GUILD_ID }}",
+                "RMFP_OWNER_ROLE_ID": "${{ secrets.PROD_RMFP_OWNER_ROLE_ID }}"
+              }
+            }
+          export_to: env
+      - name: '🤫 Create Environment Variables File'
+        run: |
+          touch .env
+          echo "APPLICATION_ID=${{ env.APPLICATION_ID }}" >> .env
+          echo "CHANNEL_ID=${{ env.CHANNEL_ID }}" >> .env
+          echo "DATABASE_URL=file:/usr/src/app/db/app.db" >> .env
+          echo "DISCORD_TOKEN=${{ env.DISCORD_TOKEN }}" >> .env
+          echo "GUILD_ID=${{ env.GUILD_ID }}" >> .env
+          echo "PUSH_DB=${{ inputs.push_db }}" >> .env
+          echo "RMFP_OWNER_ROLE_ID=${{ env.RMFP_OWNER_ROLE_ID }}" >> .env
+      - name: '☁️✅ Deploy to VM Instance'
+        run: |
+          gcloud compute instances update-container ${{ env.APP_NAME }} \
+          --zone us-east1-b \
+          --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \
+          --container-mount-disk mount-path="/usr/src/app/db",name=${{ env.DB_NAME }} \
+          --container-env-file ./.env
