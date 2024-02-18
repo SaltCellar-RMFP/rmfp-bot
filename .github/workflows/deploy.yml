@@ -14,7 +14,7 @@ on:
         type: boolean
         description: 'update prisma db on startup'
         default: false
-  workflow-call:
+  workflow_call:
     inputs:
       environment:
         type: string
