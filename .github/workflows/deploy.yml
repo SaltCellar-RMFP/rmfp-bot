@@ -73,7 +73,7 @@ jobs:
           echo "DATABASE_URL=file:/usr/src/app/db/app.db" >> .env
           echo "DISCORD_TOKEN=${{ env.DISCORD_TOKEN }}" >> .env
           echo "GUILD_ID=${{ env.GUILD_ID }}" >> .env
-          echo "PUSH_DB=${{ github.event.inputs.push_db }}" >> .env
+          echo "PUSH_DB=${{ inputs.push_db }}" >> .env
           echo "RMFP_OWNER_ROLE_ID=${{ env.RMFP_OWNER_ROLE_ID }}" >> .env
       - name: '☁️✅ Deploy to VM Instance for ${{ inputs.environment }}'
         run: |
