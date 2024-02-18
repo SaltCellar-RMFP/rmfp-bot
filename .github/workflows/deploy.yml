@@ -11,9 +11,12 @@ on:
           - stage
           - prod
       push_db:
-        type: boolean
+        type: choice
         description: 'update prisma db on startup'
-        default: false
+        default: 'false'
+        options:
+          - true
+          - false
   workflow_call:
     inputs:
       environment:
@@ -21,9 +24,9 @@ on:
         description: 'which environment to deploy to'
         default: 'stage'
       push_db:
-        type: boolean
+        type: string
         description: 'update prisma db on startup'
-        default: false
+        default: 'false'
 
 jobs:
   deploy:
@@ -72,7 +75,7 @@ jobs:
           echo "GUILD_ID=${{ env.GUILD_ID }}" >> .env
           echo "PUSH_DB=${{ github.event.inputs.push_db }}" >> .env
           echo "RMFP_OWNER_ROLE_ID=${{ env.RMFP_OWNER_ROLE_ID }}" >> .env
-      - name: '☁️✅ Deploy to VM Instance'
+      - name: '☁️✅ Deploy to VM Instance for ${{ inputs.environment }}'
         run: |
           gcloud compute instances update-container ${{ env.APP_NAME }} \
           --zone us-east1-b \
