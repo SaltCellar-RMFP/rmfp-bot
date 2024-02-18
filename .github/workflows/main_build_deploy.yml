@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - 'main'
-  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build_upload:
     runs-on: ubuntu-latest
+    outputs:
+      push_db: ${{ steps.changed-files.outputs.PUSH_DB }}
     steps:
       - name: '📥 Checkout Code'
         uses: 'actions/checkout@v4'
@@ -43,28 +44,9 @@ jobs:
           docker build -t rmfp-bot .
           docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest
           docker push us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot
-        # I know it's tedious, but it's what we've gotta do.
-      - name: '🤫 Create Environment Variables File'
-        env:
-          APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
-          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-          GUILD_ID: ${{ secrets.GUILD_ID }}
-          PUSH_DB: ${{ steps.changed-files.PUSH_DB }}
-          RMFP_OWNER_ROLE_ID: ${{ secrets.RMFP_OWNER_ROLE_ID }}
-        run: |
-          touch .env
-          echo "APPLICATION_ID=$APPLICATION_ID" >> .env
-          echo "CHANNEL_ID=$CHANNEL_ID" >> .env
-          echo "DATABASE_URL=file:/usr/src/app/db/app.db" >> .env
-          echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env
-          echo "GUILD_ID=$GUILD_ID" >> .env
-          echo "PUSH_DB=$PUSH_DB" >> .env
-          echo "RMFP_OWNER_ROLE_ID=$RMFP_OWNER_ROLE_ID" >> .env
-      - name: '☁️✅ Deploy to VM Instance'
-        run: |
-          gcloud compute instances update-container rmfp-stage-final \
-          --zone us-east1-b \
-          --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \
-          --container-mount-disk mount-path="/usr/src/app/db",name=rmfp-staging-db \
-          --container-env-file ./.env
+  deploy:
+    needs: build_upload
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: ${{ needs.build_upload.outputs.push_db == 'true' && 'stage' || 'prod' }}
+      push_db: ${{ needs.build_upload.outputs.push_db }}
