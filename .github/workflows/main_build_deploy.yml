@@ -49,5 +49,5 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       environment: ${{ needs.build_upload.outputs.push_db == 'true' && 'stage' || 'prod' }}
-      push_db: ${{ needs.build_upload.outputs.push_db == 'true'}}
+      push_db: ${{ needs.build_upload.outputs.push_db }}
     secrets: inherit
