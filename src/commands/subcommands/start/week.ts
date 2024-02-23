@@ -2,7 +2,6 @@ import process from 'node:process';
 import { Temporal } from '@js-temporal/polyfill';
 import type { Season, Week } from '@prisma/client';
 import type { CacheType, ChatInputCommandInteraction } from 'discord.js';
-import { GuildScheduledEventPrivacyLevel, GuildScheduledEventEntityType } from 'discord.js';
 import { generateText } from '../../../common/generateText.js';
 import { isRMFPOwner } from '../../../common/isRMFPOwner.js';
 import { prisma } from '../../../common/prisma.js';
@@ -70,7 +69,7 @@ async function createWeek(
 	currentSeason: Season & { weeks: Week[] },
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) {
-	const start = Temporal.Now.zonedDateTimeISO('America/Chicago').add({ seconds: 30 });
+	const start = Temporal.Now.zonedDateTimeISO(Temporal.Now.timeZoneId()).add({ seconds: 30 });
 	const end = start.with({ hour: 10, minute: 0, second: 0, millisecond: 0, microsecond: 0 }).add({ weeks: 1 });
 
 	// Create new week
@@ -84,28 +83,6 @@ async function createWeek(
 		},
 	});
 
-	// Create scheduled event
-	const scheduledEvent = await interaction.guild!.scheduledEvents.create({
-		name: `RMFP S${currentSeason.number}W${newWeek.number}`,
-
-		description: generateText(newWeek, end),
-		scheduledStartTime: new Date(start.epochMilliseconds),
-		scheduledEndTime: new Date(end.epochMilliseconds),
-		privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
-		entityType: GuildScheduledEventEntityType.External,
-		entityMetadata: {
-			location: '#rmfp',
-		},
-	});
-
-	await prisma.week.update({
-		where: {
-			id: newWeek.id,
-		},
-		data: {
-			eventId: scheduledEvent.id,
-		},
-	});
 	const channel = await interaction.guild!.channels.fetch(process.env.CHANNEL_ID!);
 	if (channel?.isTextBased()) {
 		const announcement = await channel.send(generateText(newWeek, end, true));
