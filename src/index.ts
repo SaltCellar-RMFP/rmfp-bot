@@ -11,9 +11,8 @@ const client = new Client({
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessageReactions,
-		GatewayIntentBits.GuildScheduledEvents,
 	],
-	partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildScheduledEvent],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // Load the events and commands
