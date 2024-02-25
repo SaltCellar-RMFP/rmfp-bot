@@ -66,27 +66,6 @@ export default {
 						ended: true,
 					},
 				});
-				const rows = await prisma.week.findMany({
-					select: {
-						eventId: true,
-					},
-					where: {
-						seasonNumber: currentSeason.number,
-					},
-				});
-
-				const statusUpdatePromises: Promise<void>[] = rows
-					.filter((row) => row.eventId !== null)
-					.map(async (row) => {
-						const event = await interaction.guild!.scheduledEvents.fetch(row.eventId!);
-						if (event.status === GuildScheduledEventStatus.Active) {
-							await event.setStatus(GuildScheduledEventStatus.Active, 'ended early');
-						} else if (event.status === GuildScheduledEventStatus.Scheduled) {
-							await event.setStatus(GuildScheduledEventStatus.Canceled, 'ended early');
-						}
-					});
-
-				await Promise.all(statusUpdatePromises);
 
 				await confirmation.update({
 					content: 'The current season of RMFP has ended.',

@@ -1,10 +1,13 @@
 import type { PathLike } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { URL } from 'node:url';
+import { CronJob } from 'cron';
 import { predicate as commandPredicate } from '../commands/index.js';
 import type { Command } from '../commands/index.ts';
 import { predicate as eventPredicate } from '../events/index.js';
-import type { Event } from '../events/index.ts';
+import type { Event } from '../events/index.js';
+import type { Job } from '../jobs/index.js';
+import { predicate as jobPredicate } from '../jobs/index.js';
 
 /**
  * A predicate to check if the structure is valid
@@ -73,4 +76,11 @@ export async function loadCommands(dir: PathLike, recursive = true): Promise<Map
 
 export async function loadEvents(dir: PathLike, recursive = true): Promise<Event[]> {
 	return loadStructures(dir, eventPredicate, recursive);
+}
+
+export async function loadJobs(dir: PathLike, recursive = true): Promise<CronJob[]> {
+	const jobs = await loadStructures(dir, jobPredicate, recursive);
+	return jobs.map(
+		(jobParams) => new CronJob(jobParams.cronTime, jobParams.onTick, undefined, jobParams.start, jobParams.timeZone),
+	);
 }

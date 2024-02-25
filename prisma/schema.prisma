@@ -23,7 +23,6 @@ model Week {
   scheduledEnd   DateTime
   ended          Boolean  @default(false)
   theme          String
-  eventId        String?  @unique
   entries        Entry[]
   season         Season   @relation(fields: [seasonNumber], references: [number], onDelete: Cascade)
   seasonNumber   Int
