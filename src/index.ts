@@ -21,7 +21,7 @@ const commandsUrl = new URL('commands/', import.meta.url);
 const jobsUrl = new URL('jobs/', import.meta.url);
 const events = await loadEvents(eventsUrl);
 const commands = await loadCommands(commandsUrl);
-const jobs = await loadJobs(jobsUrl);
+await loadJobs(jobsUrl);
 // Register the event handlers
 registerEvents(commands, events, client);
 

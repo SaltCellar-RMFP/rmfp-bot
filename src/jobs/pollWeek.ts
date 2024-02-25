@@ -6,18 +6,34 @@ import { prisma } from '../common/prisma.js';
 import type { Job } from './index.js';
 
 const closeRMFPWeek = async (week: Week, client: Client) => {
-	const winners = await prisma.week.winners(week.number);
-	// Populate channel information
-	const channel = (await client.channels.fetch(process.env.CHANNEL_ID!))!;
-	if (!channel.isTextBased()) {
-		console.error(`[Poll Week Job] - The provided CHANNEL_ID does not point to a text-based channel.`);
+	const guild = await client.guilds.fetch(process.env.GUILD_ID!);
+	const rmfpOwnerRole = await guild.roles.fetch(process.env.ROLE_ID!);
+	if (rmfpOwnerRole === null) {
+		console.error(`[Close RMFP Week] No RMFP owner role was detected!`);
 		return;
 	}
 
-	console.log('closing week');
-};
+	const rmfpOwners = rmfpOwnerRole.members.values();
 
-const announceImpendingDeadline = async (week: Week, client: Client) => {};
+	const winners = await prisma.week.winners(week.number);
+	const content = [
+		`The winner(s) of RMFP S${week.seasonNumber}W${week.number} are:`,
+		...winners.map((winner, idx) => `${idx + 1}. <@${winner.userId}>'s [message](${winner.messageUrl})`),
+	].join('\n');
+
+	for (const owner of rmfpOwners) {
+		await owner.send(content);
+	}
+
+	await prisma.week.update({
+		where: {
+			id: week.id,
+		},
+		data: {
+			ended: true,
+		},
+	});
+};
 
 export default {
 	cronTime: '0 * * * * *',
@@ -33,28 +49,16 @@ export default {
 			return;
 		}
 
-		if (week.scheduledEnd.getTime() < Date.now()) {
-			// The current week has ended -- Time to let everyone know!
-			const client = new Client({
-				intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds],
-				partials: [Partials.Message, Partials.Channel],
-			});
-			await client.login(process.env.DISCORD_TOKEN!);
-			await closeRMFPWeek(week, client);
+		if (week.scheduledEnd.getTime() > Date.now()) {
 			return;
 		}
 
-		const now = Temporal.Now.zonedDateTimeISO(Temporal.Now.timeZoneId());
-		const weekEndTemporal = Temporal.Instant.fromEpochMilliseconds(week.scheduledEnd.getTime()).toZonedDateTimeISO(
-			Temporal.Now.timeZoneId(),
-		);
-		const daysRemaining = now.until(weekEndTemporal, { largestUnit: 'day' }).days;
-		if (daysRemaining <= 2) {
-			const client = new Client({
-				intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds],
-			});
-			await client.login(process.env.DISCORD_TOKEN!);
-			await announceImpendingDeadline(week, client);
-		}
+		// The current week has ended -- Time to let the owners know!
+		const client = new Client({
+			intents: [GatewayIntentBits.GuildMessages, GatewayIntentBits.Guilds],
+			partials: [Partials.Message, Partials.Channel],
+		});
+		await client.login(process.env.DISCORD_TOKEN!);
+		await closeRMFPWeek(week, client);
 	},
 } satisfies Job;
