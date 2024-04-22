@@ -11,7 +11,8 @@ export default {
 		if (
 			!message.mentions.has(process.env.APPLICATION_ID!) ||
 			message.guildId !== process.env.GUILD_ID! ||
-			message.channelId !== process.env.CHANNEL_ID!
+			message.channelId !== process.env.CHANNEL_ID! ||
+			message.reference !== null // message should not be as a reply
 		) {
 			return;
 		}
