@@ -11,7 +11,9 @@ export default {
 		if (
 			!message.mentions.has(process.env.APPLICATION_ID!) ||
 			message.guildId !== process.env.GUILD_ID! ||
-			message.channelId !== process.env.CHANNEL_ID!
+			message.channelId !== process.env.CHANNEL_ID! ||
+			message.reference !== null || // message should not be as a reply
+			message.attachments.size === 0 // message should have attachments (images)
 		) {
 			return;
 		}

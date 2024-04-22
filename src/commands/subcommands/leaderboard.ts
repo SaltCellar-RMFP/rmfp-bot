@@ -29,7 +29,7 @@ const calculateLeaderboardForSeason = async (
 				points: entry._sum.firstTimeBonus! + entry._count.userId! + entry._sum.winnerBonus!,
 			};
 		})
-		.sort((a, b) => a.points - b.points);
+		.sort((a, b) => b.points - a.points);
 
 	const response = [`# RMFP Season ${seasonNumber}`];
 	for (const [idx, row] of results.entries()) {
