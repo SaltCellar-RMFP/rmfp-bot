@@ -2,7 +2,7 @@ import type { MessageReaction, PartialMessageReaction, PartialUser, User } from 
 import { prisma } from '../common/prisma.js';
 
 export const updateRMFPScore = async (reaction: MessageReaction | PartialMessageReaction, user: PartialUser | User) => {
-	if (reaction.emoji.name !== '❤️') {
+	if (reaction.emoji.name !== 'muah') {
 		return;
 	}
 
