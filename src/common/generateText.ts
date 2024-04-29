@@ -13,7 +13,7 @@ export const generateText = (week: Week, deadline: Temporal.ZonedDateTime, inclu
 		`- 1 point for submission`,
 		`- 3 points for first-time participants`,
 		`- 2 points for highest :muah: count`,
-		`- Entries must be submitted by ${deadline.toLocaleString()}`,
+		`- Entries must be submitted by <t:${deadline.epochSeconds}:F>`,
 	);
 	return content.join('\n');
 };
