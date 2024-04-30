@@ -7,7 +7,7 @@ import type { Job } from './index.js';
 
 const closeRMFPWeek = async (week: Week, client: Client) => {
 	const guild = await client.guilds.fetch(process.env.GUILD_ID!);
-	const rmfpOwnerRole = await guild.roles.fetch(process.env.ROLE_ID!);
+	const rmfpOwnerRole = await guild.roles.fetch(process.env.RMFP_OWNER_ROLE_ID!);
 	if (rmfpOwnerRole === null) {
 		console.error(`[Close RMFP Week] No RMFP owner role was detected!`);
 		return;
