@@ -61,4 +61,5 @@ export default {
 		await client.login(process.env.DISCORD_TOKEN!);
 		await closeRMFPWeek(week, client);
 	},
+	timeZone: 'UTC',
 } satisfies Job;
