@@ -17,7 +17,7 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 
 	console.log(`[Close RMFP Week] RMFP Owners found: ${rmfpOwnerRole.members.size}`);
 
-	const winners = await prisma.week.winners(week.number);
+	const winners = await prisma.week.winners(week.id);
 	const content = [
 		`The winner(s) of RMFP S${week.seasonNumber}W${week.number} are:`,
 		...winners.map((winner, idx) => `${idx + 1}. <@${winner.userId}>'s [message](${winner.messageUrl})`),
