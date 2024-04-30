@@ -38,6 +38,21 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 		},
 	});
 	console.log('[Close RMFP Week] Week has been ended.');
+
+	console.log('[Close RMFP Week] Designating winner bonus...');
+	for (const winner of winners) {
+		await prisma.entry.update({
+			where: {
+				userId_weekId: {
+					userId: winner.userId,
+					weekId: winner.weekId,
+				},
+			},
+			data: {
+				winnerBonus: 2,
+			},
+		});
+	}
 };
 
 /**
