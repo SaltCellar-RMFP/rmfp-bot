@@ -53,6 +53,8 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 			},
 		});
 	}
+
+	console.log('[Close RMFP Week] Winner bonus assigned.');
 };
 
 /**
