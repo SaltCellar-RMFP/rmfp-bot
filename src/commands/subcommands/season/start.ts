@@ -7,8 +7,8 @@ import type { SubCommand } from '../index.js';
  * Begins a new RMFP season. Informs the user if one is ongoing that they must invoke `/rmfp end_season` first.
  */
 export default {
-	subCommandOption: (subCommand) => subCommand.setName('season').setDescription('Starts a new season of RMFP!'),
-	name: 'season',
+	subCommandOption: (subCommand) => subCommand.setName('start').setDescription('Starts a new season of RMFP!'),
+	name: 'start',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({

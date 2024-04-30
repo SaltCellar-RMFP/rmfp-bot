@@ -1,14 +1,14 @@
 import { ButtonBuilder, ButtonStyle, ActionRowBuilder, GuildScheduledEventStatus } from 'discord.js';
-import { isRMFPOwner, isRMFPOwnerFilter } from '../../common/isRMFPOwner.js';
-import { prisma } from '../../common/prisma.js';
-import type { SubCommand } from './index.js';
+import { isRMFPOwner, isRMFPOwnerFilter } from '../../../common/isRMFPOwner.js';
+import { prisma } from '../../../common/prisma.js';
+import type { SubCommand } from '../index.js';
 
 /**
  * Ends the current RMFP season.
  */
 export default {
-	subCommandOption: (subCommand) => subCommand.setName('end_season').setDescription('Ends this season of RMFP.'),
-	name: 'end_season',
+	subCommandOption: (subCommand) => subCommand.setName('end').setDescription('Ends this season of RMFP.'),
+	name: 'end',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({

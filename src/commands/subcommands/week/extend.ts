@@ -1,7 +1,7 @@
 import { Temporal } from '@js-temporal/polyfill';
-import { isRMFPOwner } from '../../common/isRMFPOwner.js';
-import { prisma } from '../../common/prisma.js';
-import type { SubCommand } from './index.js';
+import { isRMFPOwner } from '../../../common/isRMFPOwner.js';
+import { prisma } from '../../../common/prisma.js';
+import type { SubCommand } from '../index.js';
 
 export default {
 	subCommandOption: (subCommand) =>

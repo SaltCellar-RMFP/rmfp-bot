@@ -15,12 +15,12 @@ const THEME_OPTION = 'theme';
 export default {
 	subCommandOption: (subCommand) =>
 		subCommand
-			.setName('week')
+			.setName('start')
 			.setDescription('Starts a new week of RMFP.')
 			.addStringOption((option) =>
 				option.setName(THEME_OPTION).setDescription("What's this week's theme?").setRequired(true),
 			),
-	name: 'week',
+	name: 'start',
 	async execute(interaction) {
 		if (!isRMFPOwner(interaction.guild, interaction.member)) {
 			await interaction.reply({
