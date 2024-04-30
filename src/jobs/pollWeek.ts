@@ -15,6 +15,8 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 
 	const rmfpOwners = rmfpOwnerRole.members.values();
 
+	console.log(`[Close RMFP Week] RMFP Owners found`);
+
 	const winners = await prisma.week.winners(week.number);
 	const content = [
 		`The winner(s) of RMFP S${week.seasonNumber}W${week.number} are:`,
@@ -22,9 +24,11 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 	].join('\n');
 
 	for (const owner of rmfpOwners) {
+		console.log(`Dispatching announcement message to: ${owner.user.username}`);
 		await owner.send(content);
 	}
 
+	console.log('[Close RMFP Week] Marking week as ended...');
 	await prisma.week.update({
 		where: {
 			id: week.id,
@@ -33,6 +37,7 @@ const closeRMFPWeek = async (week: Week, client: Client) => {
 			ended: true,
 		},
 	});
+	console.log('[Close RMFP Week] Week has been ended.');
 };
 
 export default {
