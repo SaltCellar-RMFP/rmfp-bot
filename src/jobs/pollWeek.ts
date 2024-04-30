@@ -39,6 +39,7 @@ export default {
 	cronTime: '0 * * * * *',
 	start: true,
 	onTick: async () => {
+		console.log('[Poll Week] Checking for week expiration...');
 		const week = await prisma.week.findFirst({
 			where: {
 				ended: false,
@@ -46,12 +47,16 @@ export default {
 		});
 
 		if (week === null) {
+			console.warn('[Poll Week] Week not found.');
 			return;
 		}
 
+		console.log(`[Poll Week] Week found. Expiration: ${week.scheduledEnd}`);
 		if (week.scheduledEnd.getTime() > Date.now()) {
 			return;
 		}
+
+		console.log(`[Poll Week] Week has expired! Ending week.`);
 
 		// The current week has ended -- Time to let the owners know!
 		const client = new Client({
