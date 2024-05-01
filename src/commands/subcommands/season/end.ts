@@ -22,7 +22,7 @@ export default {
 
 		if (currentSeason === null) {
 			await interaction.reply({
-				content: "There's no ongoing RMFP season to end. Have you run `/rmfp start season`?",
+				content: "There's no ongoing RMFP season to end. Have you run `/rmfp season start`?",
 				ephemeral: true,
 			});
 			return;

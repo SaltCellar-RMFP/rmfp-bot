@@ -4,7 +4,7 @@ import { prisma } from '../../../common/prisma.js';
 import type { SubCommand } from '../index.js';
 
 /**
- * Begins a new RMFP season. Informs the user if one is ongoing that they must invoke `/rmfp end_season` first.
+ * Begins a new RMFP season. Informs the user if one is ongoing that they must invoke `/rmfp season end` first.
  */
 export default {
 	subCommandOption: (subCommand) => subCommand.setName('start').setDescription('Starts a new season of RMFP!'),
@@ -24,7 +24,7 @@ export default {
 			// We can't have two seasons of RMFP going at once, the admin must end the current season first.
 			await interaction.reply({
 				content:
-					"A new season of RMFP can't be started until the current season has been ended! Use `/rmfp endSeason` to end the current season.",
+					"A new season of RMFP can't be started until the current season has been ended! Use `/rmfp season end` to end the current season.",
 				ephemeral: true,
 			});
 			return;

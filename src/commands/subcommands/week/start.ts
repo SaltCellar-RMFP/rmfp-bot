@@ -35,7 +35,7 @@ export default {
 		if (currentSeason === null) {
 			await interaction.reply({
 				content:
-					"There's no RMFP season ongoing. You need to start a season (`/rmfp start season`) before running this command.",
+					"There's no RMFP season ongoing. You need to start a season (`/rmfp season start`) before running this command.",
 				ephemeral: true,
 			});
 			return;
