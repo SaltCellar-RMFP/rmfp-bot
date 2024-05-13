@@ -5,12 +5,8 @@ export const prisma = new PrismaClient().$extends({
 	model: {
 		week: {
 			async current() {
-				const now = new Date();
 				return prisma.week.findFirst({
 					where: {
-						scheduledEnd: {
-							gte: now,
-						},
 						ended: false,
 					},
 					include: {
