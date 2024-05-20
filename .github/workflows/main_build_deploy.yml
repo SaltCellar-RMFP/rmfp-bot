@@ -48,7 +48,7 @@ jobs:
           docker build -t rmfp-bot .
           docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest
           docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:${{ steps.tag.outputs.sha }}
-          docker push us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot
+          docker push --all-tags us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot
   deploy:
     needs: build_upload
     uses: ./.github/workflows/deploy.yml
