@@ -4,6 +4,11 @@ import { PrismaClient } from '@prisma/client';
 export const prisma = new PrismaClient().$extends({
 	model: {
 		week: {
+			/**
+			 * Returns the current week, if one exists. "Current" is defined by the week not being marked as ended.
+			 *
+			 * @returns The current week. 
+			 */
 			async current() {
 				return prisma.week.findFirst({
 					where: {
