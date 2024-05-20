@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       push_db: ${{ steps.changed-files.outputs.PUSH_DB }}
+      image_tag: ${{ steps.tag.outputs.sha }}
     steps:
       - name: '📥 Checkout Code'
         uses: 'actions/checkout@v4'
@@ -30,6 +31,9 @@ jobs:
               echo "PUSH_DB=false" >> "$GITHUB_OUTPUT"
             fi
           fi
+      - name: Set docker tag
+        id: tag
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: '🔑 Authenticate With GCP'
         id: auth
         uses: 'google-github-actions/auth@v2'
@@ -43,6 +47,7 @@ jobs:
         run: |
           docker build -t rmfp-bot .
           docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest
+          docker tag rmfp-bot us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:${{ steps.tag.outputs.sha }}
           docker push us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot
   deploy:
     needs: build_upload
@@ -50,4 +55,5 @@ jobs:
     with:
       environment: ${{ needs.build_upload.outputs.push_db == 'true' && 'stage' || 'prod' }}
       push_db: ${{ needs.build_upload.outputs.push_db }}
+      image_tag: ${{ needs.build_upload.outputs.image_tag }}
     secrets: inherit
