@@ -17,6 +17,10 @@ on:
         options:
           - true
           - false
+      image_tag:
+        description: 'image tag to deploy'
+        type: string
+        default: 'latest'
   workflow_call:
     inputs:
       environment:
@@ -27,6 +31,10 @@ on:
         type: string
         description: 'update prisma db on startup'
         default: 'false'
+      image_tag:
+        description: 'image tag to deploy'
+        type: string
+        default: 'latest'
 
 jobs:
   deploy:
@@ -79,6 +87,6 @@ jobs:
         run: |
           gcloud compute instances update-container ${{ env.APP_NAME }} \
           --zone us-east1-b \
-          --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:latest \
+          --container-image us-east1-docker.pkg.dev/rmfp-bot/rmfp-repo/rmfp-bot:${{ inputs.image_tag }} \
           --container-mount-disk mount-path="/usr/src/app/db",name=${{ env.DB_NAME }} \
           --container-env-file ./.env
