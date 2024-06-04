@@ -100,9 +100,11 @@ export default {
 			const currentSeason = await prisma.season.current();
 
 			if (currentSeason === null) {
-				await interaction.reply(
-					"Because you didn't specify a season number, I tried to look up data for the current season. However, it doesn't look like there is a current season: try specifying a season number instead.",
-				);
+				await interaction.reply({
+					content:
+						"Because you didn't specify a season number, I tried to look up data for the current season. However, it doesn't look like there is a current season: try specifying a season number instead.",
+					ephemeral: true,
+				});
 				return;
 			}
 
