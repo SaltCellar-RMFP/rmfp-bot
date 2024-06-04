@@ -3,6 +3,7 @@ import type { SubCommand } from './subcommands/index.js';
 import leaderboard from './subcommands/leaderboard.js';
 import endSeason from './subcommands/season/end.js';
 import startSeason from './subcommands/season/start.js';
+import uploadHistory from './subcommands/upload_history.js';
 import endWeek from './subcommands/week/end.js';
 import extend from './subcommands/week/extend.js';
 import startWeek from './subcommands/week/start.js';
@@ -19,7 +20,10 @@ const weekCommands = new Map<string, SubCommand>([
 	[extend.name, extend],
 ]);
 
-const miscCommands = new Map<string, SubCommand>([[leaderboard.name, leaderboard]]);
+const miscCommands = new Map<string, SubCommand>([
+	[leaderboard.name, leaderboard],
+	[uploadHistory.name, uploadHistory],
+]);
 
 export default {
 	data: new SlashCommandBuilder()
@@ -41,6 +45,7 @@ export default {
 				.addSubcommand(endWeek.subCommandOption),
 		)
 		.addSubcommand(leaderboard.subCommandOption)
+		.addSubcommand(uploadHistory.subCommandOption)
 		.toJSON(),
 	async execute(interaction) {
 		if (!interaction.isChatInputCommand()) {
