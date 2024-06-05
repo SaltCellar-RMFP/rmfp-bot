@@ -59,4 +59,5 @@ jobs:
       environment: ${{ needs.build_upload.outputs.push_db == 'true' && 'stage' || 'prod' }}
       push_db: ${{ needs.build_upload.outputs.push_db }}
       image_tag: ${{ needs.build_upload.outputs.image_tag }}
+      should_prune: false
     secrets: inherit
