@@ -47,6 +47,13 @@ const calculateLeaderboardForWeek = async (
 	weekNumber: number,
 	interaction: ChatInputCommandInteraction<CacheType>,
 ) => {
+	const week = await prisma.week.findFirst({
+		where: {
+			number: weekNumber,
+			seasonNumber,
+		},
+	});
+
 	const entries = await prisma.entry.findMany({
 		select: {
 			userId: true,
@@ -64,7 +71,15 @@ const calculateLeaderboardForWeek = async (
 		},
 	});
 
-	const response = [`# RMFP Season ${seasonNumber} Week ${weekNumber}`];
+	if (week === null) {
+		await interaction.reply({
+			content: `Hm... I can't find any entries for S${seasonNumber}W${weekNumber}`,
+			ephemeral: true,
+		});
+		return;
+	}
+
+	const response = [`# RMFP Season ${seasonNumber} Week ${weekNumber}`, `**Theme**: ${week.theme}`];
 
 	for (const [idx, entry] of entries.entries()) {
 		response.push(`${idx}. <@${entry.userId}> : [${entry.reacts}](${entry.messageUrl})`);
