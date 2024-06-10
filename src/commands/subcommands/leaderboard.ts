@@ -106,7 +106,7 @@ const calculateLeaderboardForWeek = async (
 	}
 
 	await interaction.reply({
-		content: response.join('\n'),
+		content: finalMessage,
 		ephemeral: true,
 	});
 };
