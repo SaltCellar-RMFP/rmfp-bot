@@ -36,8 +36,18 @@ const calculateLeaderboardForSeason = async (
 		response.push(`${idx}. <@${row.userId}> : ${row.points}`);
 	}
 
+	let finalMessage = response.join('\n');
+
+	if (finalMessage.length > 2_000) {
+		const truncatedResponse = response.slice(0, 11);
+
+		truncatedResponse.splice(1, 0, '*Only displaying top 10 due to message length limit.*');
+
+		finalMessage = truncatedResponse.join('\n');
+	}
+
 	await interaction.reply({
-		content: response.join('\n'),
+		content: finalMessage,
 		ephemeral: true,
 	});
 };
@@ -83,6 +93,16 @@ const calculateLeaderboardForWeek = async (
 
 	for (const [idx, entry] of entries.entries()) {
 		response.push(`${idx}. <@${entry.userId}> : [${entry.reacts}](${entry.messageUrl})`);
+	}
+
+	let finalMessage = response.join('\n');
+
+	if (finalMessage.length > 2_000) {
+		const truncatedResponse = response.slice(0, 11);
+
+		truncatedResponse.splice(1, 0, '*Only displaying top 10 due to message length limit.*');
+
+		finalMessage = truncatedResponse.join('\n');
 	}
 
 	await interaction.reply({
